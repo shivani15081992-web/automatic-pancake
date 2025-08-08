@@ -1,7 +1,7 @@
 // আপনার Google Gemini API Key এখানে পেস্ট করা হয়েছে
 const GEMINI_API_KEY = "AIzaSyBaWxkptjI6vrWIaPMcaP-puoq1MvmGMmY";
-// মডেল পরিবর্তন করা হয়েছে
-const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+// আপনার দেওয়া curl কমান্ড অনুযায়ী মডেল পরিবর্তন করা হয়েছে
+const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
 
 // HTML উপাদানগুলো নির্বাচন করা
 const lessonTitle = document.getElementById("lesson-title");
