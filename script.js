@@ -1,9 +1,19 @@
 const chatBox = document.getElementById("chat-box");
 const userInput = document.getElementById("user-input");
-const sendButton = document.querySelector("button");
+const sendButton = document.getElementById("send-button");
 
 // আপনার API Key এখানে দিন
 const apiKey = "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";
+
+// স্পিচ সিন্থেসিস (Text-to-Speech)
+const synth = window.speechSynthesis;
+function getBengaliFemaleVoice() {
+    const voices = synth.getVoices();
+    const femaleVoice = voices.find(voice => voice.lang === 'bn-BD' && voice.name.includes('Female')) ||
+                      voices.find(voice => voice.lang.startsWith('bn') && voice.name.includes('Female')) ||
+                      voices.find(voice => voice.lang === 'bn-IN' && voice.name.includes('Female'));
+    return femaleVoice;
+}
 
 function addMessage(text, isUser = false) {
   const msg = document.createElement("div");
@@ -11,6 +21,18 @@ function addMessage(text, isUser = false) {
   msg.textContent = text;
   chatBox.appendChild(msg);
   chatBox.scrollTop = chatBox.scrollHeight;
+
+  if (!isUser && text) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'bn-BD';
+      const femaleVoice = getBengaliFemaleVoice();
+      if (femaleVoice) {
+          utterance.voice = femaleVoice;
+      } else {
+          console.warn("No Bengali female voice found. Using default voice.");
+      }
+      synth.speak(utterance);
+  }
 }
 
 async function sendMessage() {
@@ -19,8 +41,8 @@ async function sendMessage() {
 
   addMessage(text, true);
   userInput.value = "";
-  userInput.disabled = true; // মেসেজ পাঠানোর সময় ইনপুট ফিল্ড বন্ধ করে দেওয়া
-  sendButton.disabled = true; // মেসেজ পাঠানোর সময় বাটন বন্ধ করে দেওয়া
+  userInput.disabled = true;
+  sendButton.disabled = true;
 
   addMessage("🤖 উত্তর আসছে, অনুগ্রহ করে অপেক্ষা করুন...", false);
 
@@ -42,7 +64,6 @@ async function sendMessage() {
 
     const data = await response.json();
 
-    // লোডিং মেসেজটি সরিয়ে ফেলা
     const loadingMessage = chatBox.lastChild;
     if (loadingMessage && loadingMessage.textContent.startsWith("🤖")) {
       chatBox.removeChild(loadingMessage);
@@ -57,7 +78,6 @@ async function sendMessage() {
     }
 
   } catch (err) {
-    // লোডিং মেসেজটি সরিয়ে ফেলা
     const loadingMessage = chatBox.lastChild;
     if (loadingMessage && loadingMessage.textContent.startsWith("🤖")) {
       chatBox.removeChild(loadingMessage);
@@ -65,13 +85,12 @@ async function sendMessage() {
     console.error(err);
     addMessage("❌ নেটওয়ার্ক বা API সমস্যা হয়েছে।", false);
   } finally {
-    userInput.disabled = false; // প্রক্রিয়া শেষ হলে ইনপুট ফিল্ড চালু করা
-    sendButton.disabled = false; // প্রক্রিয়া শেষ হলে বাটন চালু করা
-    userInput.focus(); // ইনপুট ফিল্ডে ফোকাস ফিরিয়ে আনা
+    userInput.disabled = false;
+    sendButton.disabled = false;
+    userInput.focus();
   }
 }
 
-// "পাঠান" বাটনে ক্লিক করলে বা এন্টার চাপলে মেসেজ পাঠানোর ফাংশন কল হবে
 sendButton.addEventListener('click', sendMessage);
 userInput.addEventListener('keydown', (event) => {
   if (event.key === 'Enter') {
@@ -79,5 +98,4 @@ userInput.addEventListener('keydown', (event) => {
   }
 });
 
-// ওয়েবসাইট লোড হওয়ার পর প্রথম মেসেজটি দেখানো
 addMessage("👋 শুভ সকাল! আমি আপনার ভার্চুয়াল শিক্ষিকা। ইংরেজি অনুশীলন শুরু করুন।", false);
