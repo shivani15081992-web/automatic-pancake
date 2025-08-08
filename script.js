@@ -1,160 +1,83 @@
-// আপনার Google Gemini API Key এখানে পেস্ট করা হয়েছে
-const GEMINI_API_KEY = "AIzaSyBaWxkptjI6vrWIaPMcaP-puoq1MvmGMmY";
-// আপনার দেওয়া curl কমান্ড অনুযায়ী মডেল পরিবর্তন করা হয়েছে
-const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
-
-// HTML উপাদানগুলো নির্বাচন করা
-const lessonTitle = document.getElementById("lesson-title");
-const lessonContent = document.querySelector('.lesson-content');
-const nextLessonBtn = document.getElementById("next-lesson-btn");
 const chatBox = document.getElementById("chat-box");
 const userInput = document.getElementById("user-input");
-const sendBtn = document.getElementById("send-btn");
-const recordBtn = document.getElementById("record-btn");
+const sendButton = document.querySelector("button");
 
-// স্পিচ সিন্থেসিস (Text-to-Speech)
-const synth = window.speechSynthesis;
+// আপনার API Key এখানে দিন
+const apiKey = "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";
 
-// ফিমেল বাংলা ভয়েস খুঁজে বের করার ফাংশন
-function getBengaliFemaleVoice() {
-    const voices = synth.getVoices();
-    const femaleVoice = voices.find(voice => voice.lang === 'bn-BD' && voice.name.includes('Female')) ||
-                      voices.find(voice => voice.lang.startsWith('bn') && voice.name.includes('Female')) ||
-                      voices.find(voice => voice.lang === 'bn-IN' && voice.name.includes('Female'));
-    return femaleVoice;
-}
-
-// চ্যাটবটে মেসেজ যোগ করার ফাংশন
 function addMessage(text, isUser = false) {
-    const message = document.createElement("p");
-    message.textContent = text;
-    message.classList.add(isUser ? "user-message" : "bot-message");
-    chatBox.appendChild(message);
-    chatBox.scrollTop = chatBox.scrollHeight;
-
-    if (!isUser && text) {
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'bn-BD';
-        const femaleVoice = getBengaliFemaleVoice();
-        if (femaleVoice) {
-            utterance.voice = femaleVoice;
-        } else {
-            console.warn("No Bengali female voice found. Using default voice.");
-        }
-        synth.speak(utterance);
-    }
+  const msg = document.createElement("div");
+  msg.className = isUser ? "user-message" : "bot-message";
+  msg.textContent = text;
+  chatBox.appendChild(msg);
+  chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-// Gemini থেকে নতুন পাঠ তৈরি করার ফাংশন
-async function createNewLesson() {
-    lessonTitle.textContent = "নতুন পাঠ তৈরি হচ্ছে...";
-    lessonContent.innerHTML = "<p>দয়া করে অপেক্ষা করুন...</p>";
+async function sendMessage() {
+  const text = userInput.value.trim();
+  if (!text) return;
 
-    try {
-        const prompt = "আপনি একজন বাংলাভাষী শিক্ষার্থীদের জন্য একজন স্পোকেন ইংলিশ শিক্ষিকা। আপনার লক্ষ্য হলো একজন শিক্ষার্থীকে ধাপে ধাপে ইংরেজি শেখানো। একটি নতুন, সহজ এবং আকর্ষণীয় পাঠ তৈরি করুন। পাঠের মধ্যে একটি ইংরেজি শব্দ বা বাক্য থাকবে, তার বাংলা উচ্চারণ এবং বাংলা অর্থ থাকবে। একটি সংক্ষিপ্ত অনুশীলনও যোগ করুন। পুরো উত্তরটি বাংলায় দিন এবং আপনার উত্তরকে HTML ট্যাগ ব্যবহার করে সুন্দরভাবে সাজান।";
+  addMessage(text, true);
+  userInput.value = "";
+  userInput.disabled = true; // মেসেজ পাঠানোর সময় ইনপুট ফিল্ড বন্ধ করে দেওয়া
+  sendButton.disabled = true; // মেসেজ পাঠানোর সময় বাটন বন্ধ করে দেওয়া
 
-        const response = await fetch(API_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                contents: [{
-                    parts: [{text: prompt}]
-                }]
-            })
-        });
+  addMessage("🤖 উত্তর আসছে, অনুগ্রহ করে অপেক্ষা করুন...", false);
 
-        const data = await response.json();
-        const lessonResponse = data.candidates[0].content.parts[0].text;
+  try {
+    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: "mistralai/mistral-7b-instruct",
+        messages: [
+          { role: "system", content: "আপনি একজন বাংলা টু ইংরেজি ভার্চুয়াল শিক্ষিকা। আপনি সহজভাবে ইংরেজি শেখান।" },
+          { role: "user", content: text }
+        ]
+      })
+    });
 
-        lessonTitle.textContent = "নতুন পাঠ";
-        lessonContent.innerHTML = lessonResponse;
-        addMessage("নতুন পাঠ তৈরি হয়েছে। অনুগ্রহ করে অনুশীলন শুরু করুন।", false);
+    const data = await response.json();
 
-    } catch (error) {
-        console.error("Gemini API Error:", error);
-        addMessage("দুঃখিত, পাঠ তৈরি করা সম্ভব হয়নি। আপনার API Key বা ইন্টারনেট সংযোগে সমস্যা হতে পারে।", false);
-        lessonTitle.textContent = "দুঃখিত!";
-        lessonContent.innerHTML = "<p>নতুন পাঠ তৈরি করা সম্ভব হয়নি। আবার চেষ্টা করুন।</p>";
+    // লোডিং মেসেজটি সরিয়ে ফেলা
+    const loadingMessage = chatBox.lastChild;
+    if (loadingMessage && loadingMessage.textContent.startsWith("🤖")) {
+      chatBox.removeChild(loadingMessage);
     }
-}
-
-// ব্যবহারকারীর ইনপুট পাঠানোর ফাংশন (টাইপ করে)
-sendBtn.addEventListener("click", async () => {
-    const userMessage = userInput.value;
-    if (userMessage.trim() === "") return;
-
-    addMessage(userMessage, true);
-    userInput.value = "";
     
-    try {
-        const prompt = `আপনি একজন বাংলাভাষী স্পোকেন ইংলিশ শিক্ষিকা। একজন শিক্ষার্থী আপনাকে বলছে: "${userMessage}"। তার উত্তরটি একজন শিক্ষিকার মতো দিন। প্রথমত, তার ভুলগুলো খুঁজে বের করুন এবং সেগুলো সহজ বাংলায় বুঝিয়ে দিন। এরপর সঠিক বাক্যটি দিন এবং তাকে আরও একটি অনুশীলনের জন্য একটি নতুন প্রশ্ন বা বাক্য দিন।`;
-        
-        const response = await fetch(API_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                contents: [{
-                    parts: [{text: prompt}]
-                }]
-            })
-        });
-
-        const data = await response.json();
-        const botResponse = data.candidates[0].content.parts[0].text;
-        addMessage(botResponse, false);
-
-    } catch (error) {
-        console.error("Gemini API Error:", error);
-        addMessage("দুঃখিত, কোনো ভুল হয়েছে। আপনার API Key বা ইন্টারনেট সংযোগে সমস্যা হতে পারে।", false);
-    }
-});
-
-
-// স্পিচ টু টেক্সট ফিচার
-const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-recognition.lang = 'en-US'; 
-recognition.interimResults = false;
-recognition.maxAlternatives = 1;
-
-recordBtn.addEventListener('click', () => {
-    const isRecording = recordBtn.classList.contains('recording');
-    if (isRecording) {
-        recognition.stop();
+    if (data.choices && data.choices[0] && data.choices[0].message) {
+      const reply = data.choices[0].message.content;
+      addMessage(reply, false);
     } else {
-        recordBtn.classList.add('recording');
-        recordBtn.style.backgroundColor = '#2ecc71'; 
-        addMessage("আপনার কথা শোনা হচ্ছে...", false);
-        recognition.start();
+      addMessage("⚠️ দুঃখিত, কিছু ভুল হয়েছে। আবার চেষ্টা করুন।", false);
+      console.error(data);
     }
+
+  } catch (err) {
+    // লোডিং মেসেজটি সরিয়ে ফেলা
+    const loadingMessage = chatBox.lastChild;
+    if (loadingMessage && loadingMessage.textContent.startsWith("🤖")) {
+      chatBox.removeChild(loadingMessage);
+    }
+    console.error(err);
+    addMessage("❌ নেটওয়ার্ক বা API সমস্যা হয়েছে।", false);
+  } finally {
+    userInput.disabled = false; // প্রক্রিয়া শেষ হলে ইনপুট ফিল্ড চালু করা
+    sendButton.disabled = false; // প্রক্রিয়া শেষ হলে বাটন চালু করা
+    userInput.focus(); // ইনপুট ফিল্ডে ফোকাস ফিরিয়ে আনা
+  }
+}
+
+// "পাঠান" বাটনে ক্লিক করলে বা এন্টার চাপলে মেসেজ পাঠানোর ফাংশন কল হবে
+sendButton.addEventListener('click', sendMessage);
+userInput.addEventListener('keydown', (event) => {
+  if (event.key === 'Enter') {
+    sendMessage();
+  }
 });
 
-recognition.addEventListener('result', async (event) => {
-    const transcript = event.results[0][0].transcript;
-    userInput.value = transcript;
-    sendBtn.click();
-});
-
-recognition.addEventListener('end', () => {
-    recordBtn.classList.remove('recording');
-    recordBtn.style.backgroundColor = '#e74c3c';
-});
-
-recognition.addEventListener('error', (event) => {
-    console.error('Speech recognition error', event);
-    recordBtn.classList.remove('recording');
-    recordBtn.style.backgroundColor = '#e74c3c';
-    addMessage("দুঃখিত, আপনার কথা শুনতে পাইনি। অনুগ্রহ করে আবার চেষ্টা করুন।", false);
-});
-
-// পরবর্তী পাঠে যাওয়ার ফাংশন
-nextLessonBtn.addEventListener("click", () => {
-    createNewLesson();
-});
-
-// প্রথমবার পেজ লোড হলে
-addMessage("শুভ সকাল! আমি আপনার ভার্চুয়াল শিক্ষিকা। ইংরেজি অনুশীলন করতে শুরু করুন।", false);
-createNewLesson();
+// ওয়েবসাইট লোড হওয়ার পর প্রথম মেসেজটি দেখানো
+addMessage("👋 শুভ সকাল! আমি আপনার ভার্চুয়াল শিক্ষিকা। ইংরেজি অনুশীলন শুরু করুন।", false);
