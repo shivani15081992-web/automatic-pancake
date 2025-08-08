@@ -1,5 +1,5 @@
 // OpenRouter API Key এখানে পেস্ট করা হয়েছে
-const OPENROUTER_API_KEY = "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";
+const OPENROUTER_API_KEY = "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";
 const API_URL = "https://openrouter.ai/api/v1/chat/completions";
 const MODEL_NAME = "mistralai/mistral-7b-instruct";
 
