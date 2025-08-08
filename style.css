@@ -1,10 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Noto+Sans+Bengali:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Noto+Sans+Bengali:wght@400;500;700&display=swap');
 
 body {
     font-family: 'Noto Sans Bengali', sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #eef1f6;
+    background-color: #f0f2f5;
     color: #333;
     display: flex;
     justify-content: center;
@@ -34,6 +34,7 @@ h1 {
     color: #2c3e50;
     font-size: 2em;
     margin: 0;
+    font-weight: 700;
 }
 
 p {
@@ -47,38 +48,53 @@ h2 {
     border-bottom: 1px solid #ddd;
     padding-bottom: 10px;
     margin-top: 30px;
+    font-weight: 600;
 }
 
-#course-section, #teacher-section {
-    margin-top: 20px;
-}
-
-.lesson-content {
+#lesson-content {
     background-color: #f8f9fa;
-    border-left: 5px solid #007bff;
     padding: 20px;
-    margin-bottom: 20px;
     border-radius: 8px;
-    line-height: 1.6;
+    margin-bottom: 20px;
 }
 
-button {
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    padding: 12px 25px;
-    font-size: 16px;
-    cursor: pointer;
-    border-radius: 8px;
+#lesson-content h3 {
+    font-family: 'Poppins', sans-serif;
+    color: #007bff;
+}
+
+#lesson-content ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+#lesson-content li {
+    background-color: #e9ecef;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 8px;
+}
+
+#next-lesson-btn {
     width: 100%;
-    margin-top: 15px;
-    transition: background-color 0.3s ease, transform 0.2s ease;
+    padding: 12px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
     font-family: 'Noto Sans Bengali', sans-serif;
 }
 
-button:hover {
+#next-lesson-btn:hover {
     background-color: #0056b3;
-    transform: translateY(-2px);
+}
+
+#next-lesson-btn:active {
+    background-color: #004494;
 }
 
 #chat-box {
@@ -118,6 +134,7 @@ button:hover {
 .input-container {
     display: flex;
     gap: 10px;
+    align-items: center;
 }
 
 #user-input {
@@ -129,15 +146,37 @@ button:hover {
     font-family: 'Noto Sans Bengali', sans-serif;
 }
 
-#send-btn {
-    width: auto;
+#send-btn, #record-btn {
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    padding: 12px 18px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    font-family: 'Noto Sans Bengali', sans-serif;
 }
 
-#ad-container {
-    margin-top: 25px;
-    text-align: center;
-    border-top: 1px dashed #ddd;
-    padding-top: 25px;
+#send-btn {
+    background-color: #007bff;
+}
+
+#record-btn {
+    padding: 12px;
+}
+
+#record-btn svg {
+    vertical-align: middle;
+}
+
+#send-btn:disabled, #record-btn:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.recording {
+    background-color: #e74c3c !important;
 }
 
 @keyframes fadeIn {
