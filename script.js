@@ -1,5 +1,5 @@
-// আপনার Google Gemini API Key এখানে পেস্ট করুন
-const GEMINI_API_KEY = "AIzaSyC3bmWu50URTnT0jiek3WRV4rgJf8fvhis";
+// আপনার Google Gemini API Key এখানে পেস্ট করা হয়েছে
+const GEMINI_API_KEY = "AIzaSyBaWxkptjI6vrWIaPMcaP-puoq1MvmGMmY";
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
 
 // HTML উপাদানগুলো নির্বাচন করা
@@ -66,6 +66,7 @@ async function createNewLesson() {
 
         lessonTitle.textContent = "নতুন পাঠ";
         lessonContent.innerHTML = lessonResponse;
+        addMessage("নতুন পাঠ তৈরি হয়েছে। অনুগ্রহ করে অনুশীলন শুরু করুন।", false);
 
     } catch (error) {
         console.error("Gemini API Error:", error);
@@ -83,7 +84,6 @@ sendBtn.addEventListener("click", async () => {
     addMessage(userMessage, true);
     userInput.value = "";
     
-    // Gemini API-কে প্রশ্ন পাঠানো
     try {
         const prompt = `আপনি একজন বাংলাভাষী স্পোকেন ইংলিশ শিক্ষিকা। একজন শিক্ষার্থী আপনাকে বলছে: "${userMessage}"। তার উত্তরটি একজন শিক্ষিকার মতো দিন। প্রথমত, তার ভুলগুলো খুঁজে বের করুন এবং সেগুলো সহজ বাংলায় বুঝিয়ে দিন। এরপর সঠিক বাক্যটি দিন এবং তাকে আরও একটি অনুশীলনের জন্য একটি নতুন প্রশ্ন বা বাক্য দিন।`;
         
@@ -112,31 +112,37 @@ sendBtn.addEventListener("click", async () => {
 
 // স্পিচ টু টেক্সট ফিচার
 const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-recognition.lang = 'en-US'; // ইংরেজিতে কথা বলা বোঝার জন্য
+recognition.lang = 'en-US'; 
 recognition.interimResults = false;
 recognition.maxAlternatives = 1;
 
 recordBtn.addEventListener('click', () => {
-    recordBtn.style.backgroundColor = '#2ecc71'; // রেকর্ডিং শুরু হলে সবুজ
-    recordBtn.disabled = true;
-    recognition.start();
+    const isRecording = recordBtn.classList.contains('recording');
+    if (isRecording) {
+        recognition.stop();
+    } else {
+        recordBtn.classList.add('recording');
+        recordBtn.style.backgroundColor = '#2ecc71'; 
+        addMessage("আপনার কথা শোনা হচ্ছে...", false);
+        recognition.start();
+    }
 });
 
 recognition.addEventListener('result', async (event) => {
     const transcript = event.results[0][0].transcript;
     userInput.value = transcript;
-    sendBtn.click(); // ভয়েস ইনপুট টেক্সট বক্সে এলে স্বয়ংক্রিয়ভাবে পাঠানো হবে
+    sendBtn.click();
 });
 
 recognition.addEventListener('end', () => {
-    recordBtn.style.backgroundColor = '#e74c3c'; // রেকর্ডিং শেষ হলে লাল
-    recordBtn.disabled = false;
+    recordBtn.classList.remove('recording');
+    recordBtn.style.backgroundColor = '#e74c3c';
 });
 
 recognition.addEventListener('error', (event) => {
     console.error('Speech recognition error', event);
+    recordBtn.classList.remove('recording');
     recordBtn.style.backgroundColor = '#e74c3c';
-    recordBtn.disabled = false;
     addMessage("দুঃখিত, আপনার কথা শুনতে পাইনি। অনুগ্রহ করে আবার চেষ্টা করুন।", false);
 });
 
