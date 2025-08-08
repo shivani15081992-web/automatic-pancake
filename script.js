@@ -9,6 +9,7 @@ const nextLessonBtn = document.getElementById("next-lesson-btn");
 const chatBox = document.getElementById("chat-box");
 const userInput = document.getElementById("user-input");
 const sendBtn = document.getElementById("send-btn");
+const recordBtn = document.getElementById("record-btn");
 
 // স্পিচ সিন্থেসিস (Text-to-Speech)
 const synth = window.speechSynthesis;
@@ -29,7 +30,7 @@ function addMessage(text, isUser = false) {
     chatBox.appendChild(message);
     chatBox.scrollTop = chatBox.scrollHeight;
 
-    if (!isUser) {
+    if (!isUser && text) {
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'bn-BD';
         const femaleVoice = getBengaliFemaleVoice();
@@ -68,22 +69,24 @@ async function createNewLesson() {
 
     } catch (error) {
         console.error("Gemini API Error:", error);
+        addMessage("দুঃখিত, পাঠ তৈরি করা সম্ভব হয়নি। আপনার API Key ঠিক আছে কি না দেখুন এবং আবার চেষ্টা করুন।", false);
         lessonTitle.textContent = "দুঃখিত!";
         lessonContent.innerHTML = "<p>নতুন পাঠ তৈরি করা সম্ভব হয়নি। আবার চেষ্টা করুন।</p>";
     }
 }
 
-// ব্যবহারকারীর ইনপুট পাঠানোর ফাংশন
+// ব্যবহারকারীর ইনপুট পাঠানোর ফাংশন (টাইপ করে)
 sendBtn.addEventListener("click", async () => {
     const userMessage = userInput.value;
     if (userMessage.trim() === "") return;
 
     addMessage(userMessage, true);
     userInput.value = "";
-
+    
+    // Gemini API-কে প্রশ্ন পাঠানো
     try {
         const prompt = `আপনি একজন বাংলাভাষী স্পোকেন ইংলিশ শিক্ষিকা। একজন শিক্ষার্থী আপনাকে বলছে: "${userMessage}"। তার উত্তরটি একজন শিক্ষিকার মতো দিন। প্রথমত, তার ভুলগুলো খুঁজে বের করুন এবং সেগুলো সহজ বাংলায় বুঝিয়ে দিন। এরপর সঠিক বাক্যটি দিন এবং তাকে আরও একটি অনুশীলনের জন্য একটি নতুন প্রশ্ন বা বাক্য দিন।`;
-
+        
         const response = await fetch(API_URL, {
             method: 'POST',
             headers: {
@@ -102,8 +105,39 @@ sendBtn.addEventListener("click", async () => {
 
     } catch (error) {
         console.error("Gemini API Error:", error);
-        addMessage("দুঃখিত, কোনো ভুল হয়েছে। আবার চেষ্টা করুন।", false);
+        addMessage("দুঃখিত, কোনো ভুল হয়েছে। আপনার API Key ঠিক আছে কি না দেখুন এবং আবার চেষ্টা করুন।", false);
     }
+});
+
+
+// স্পিচ টু টেক্সট ফিচার
+const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+recognition.lang = 'en-US'; // ইংরেজিতে কথা বলা বোঝার জন্য
+recognition.interimResults = false;
+recognition.maxAlternatives = 1;
+
+recordBtn.addEventListener('click', () => {
+    recordBtn.style.backgroundColor = '#2ecc71'; // রেকর্ডিং শুরু হলে সবুজ
+    recordBtn.disabled = true;
+    recognition.start();
+});
+
+recognition.addEventListener('result', async (event) => {
+    const transcript = event.results[0][0].transcript;
+    userInput.value = transcript;
+    sendBtn.click(); // ভয়েস ইনপুট টেক্সট বক্সে এলে স্বয়ংক্রিয়ভাবে পাঠানো হবে
+});
+
+recognition.addEventListener('end', () => {
+    recordBtn.style.backgroundColor = '#e74c3c'; // রেকর্ডিং শেষ হলে লাল
+    recordBtn.disabled = false;
+});
+
+recognition.addEventListener('error', (event) => {
+    console.error('Speech recognition error', event);
+    recordBtn.style.backgroundColor = '#e74c3c';
+    recordBtn.disabled = false;
+    addMessage("দুঃখিত, আপনার কথা শুনতে পাইনি। অনুগ্রহ করে আবার চেষ্টা করুন।", false);
 });
 
 // পরবর্তী পাঠে যাওয়ার ফাংশন
@@ -111,8 +145,6 @@ nextLessonBtn.addEventListener("click", () => {
     createNewLesson();
 });
 
-// প্রথমবার পেজ লোড হলে একটি প্রাথমিক মেসেজ দেখানো
+// প্রথমবার পেজ লোড হলে
 addMessage("শুভ সকাল! আমি আপনার ভার্চুয়াল শিক্ষিকা। ইংরেজি অনুশীলন করতে শুরু করুন।", false);
-
-// প্রথমবার পেজ লোড হলে একটি পাঠ তৈরি করা
 createNewLesson();
