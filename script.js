@@ -1,6 +1,7 @@
 // OpenRouter API Key এখানে পেস্ট করা হয়েছে
 const OPENROUTER_API_KEY = "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";
 const API_URL = "https://openrouter.ai/api/v1/chat/completions";
+const MODEL_NAME = "mistralai/mistral-7b-instruct";
 
 // HTML উপাদানগুলো নির্বাচন করা
 const lessonTitle = document.getElementById("lesson-title");
@@ -59,7 +60,7 @@ async function createNewLesson() {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                model: "mistralai/mistral-7b-instruct",
+                model: MODEL_NAME,
                 messages: [
                     { role: "system", content: "আপনি একজন বাংলা টু ইংরেজি ভার্চুয়াল শিক্ষিকা। আপনি সহজভাবে ইংরেজি শেখান।" },
                     { role: "user", content: prompt }
@@ -77,6 +78,8 @@ async function createNewLesson() {
         } else {
             addMessage("⚠️ দুঃখিত, পাঠ তৈরি করা সম্ভব হয়নি।", false);
             console.error("OpenRouter API Error:", data);
+            lessonTitle.textContent = "দুঃখিত!";
+            lessonContent.innerHTML = "<p>নতুন পাঠ তৈরি করা সম্ভব হয়নি। আবার চেষ্টা করুন।</p>";
         }
 
     } catch (error) {
@@ -105,7 +108,7 @@ sendBtn.addEventListener("click", async () => {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                model: "mistralai/mistral-7b-instruct",
+                model: MODEL_NAME,
                 messages: [
                     { role: "system", content: "আপনি একজন বাংলা টু ইংরেজি ভার্চুয়াল শিক্ষিকা। আপনি সহজভাবে ইংরেজি শেখান।" },
                     { role: "user", content: prompt }
