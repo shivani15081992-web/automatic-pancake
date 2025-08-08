@@ -16,13 +16,28 @@
             <p>আপনার স্পোকেন ইংলিশ শেখার যাত্রা শুরু করুন।</p>
         </header>
 
+        <section id="lesson-section">
+            <h2 id="lesson-title">নতুন পাঠ</h2>
+            <div id="lesson-content">
+                </div>
+            <button id="next-lesson-btn">পরবর্তী পাঠ</button>
+        </section>
+
         <section id="chat-section">
             <h2>ভার্চুয়াল শিক্ষিকা</h2>
             <div id="chat-box">
                 </div>
             <div class="input-container">
-                <input type="text" id="user-input" placeholder="এখানে আপনার উত্তর লিখুন...">
-                <button id="send-button">পাঠান</button>
+                <input type="text" id="user-input" placeholder="এখানে আপনার উত্তর লিখুন..." autofocus>
+                <button id="record-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-mic">
+                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                        <line x1="12" y1="19" x2="12" y2="23"></line>
+                        <line x1="8" y1="23" x2="16" y2="23"></line>
+                    </svg>
+                </button>
+                <button id="send-btn">পাঠান</button>
             </div>
         </section>
     </div>
