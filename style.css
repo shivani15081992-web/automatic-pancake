@@ -1,36 +1,52 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Noto+Sans+Bengali:wght@400;500&display=swap');
+
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Noto Sans Bengali', sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f4f4f9;
+    background-color: #eef1f6;
     color: #333;
     display: flex;
     justify-content: center;
+    min-height: 100vh;
 }
 
 .container {
     width: 100%;
     max-width: 600px;
-    background-color: #fff;
-    padding: 20px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: #ffffff;
+    padding: 25px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     box-sizing: border-box;
+    border-radius: 12px;
+    margin: 20px;
 }
 
 header {
     text-align: center;
     padding-bottom: 20px;
-    border-bottom: 2px solid #eee;
+    border-bottom: 2px solid #e0e0e0;
+    margin-bottom: 20px;
 }
 
 h1 {
-    color: #4a90e2;
+    font-family: 'Poppins', sans-serif;
+    color: #2c3e50;
+    font-size: 2em;
+    margin: 0;
+}
+
+p {
+    font-size: 1em;
+    color: #6c757d;
 }
 
 h2 {
-    color: #555;
+    font-family: 'Poppins', sans-serif;
+    color: #34495e;
     border-bottom: 1px solid #ddd;
     padding-bottom: 10px;
+    margin-top: 30px;
 }
 
 #course-section, #teacher-section {
@@ -38,68 +54,99 @@ h2 {
 }
 
 .lesson-content {
-    background-color: #f9f9f9;
-    border-left: 5px solid #4a90e2;
-    padding: 15px;
-    margin-bottom: 15px;
+    background-color: #f8f9fa;
+    border-left: 5px solid #007bff;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    line-height: 1.6;
 }
 
 button {
-    background-color: #4a90e2;
+    background-color: #007bff;
     color: #fff;
     border: none;
-    padding: 10px 20px;
+    padding: 12px 25px;
     font-size: 16px;
     cursor: pointer;
-    border-radius: 5px;
+    border-radius: 8px;
     width: 100%;
-    margin-top: 10px;
+    margin-top: 15px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    font-family: 'Noto Sans Bengali', sans-serif;
 }
 
 button:hover {
-    background-color: #357abd;
+    background-color: #0056b3;
+    transform: translateY(-2px);
 }
 
 #chat-box {
     border: 1px solid #ddd;
-    padding: 10px;
-    height: 300px;
-    overflow-y: scroll;
-    margin-bottom: 10px;
-    border-radius: 5px;
+    padding: 15px;
+    height: 350px;
+    overflow-y: auto;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
 }
 
 .bot-message, .user-message {
-    padding: 8px;
-    margin-bottom: 5px;
-    border-radius: 5px;
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    max-width: 80%;
+    word-wrap: break-word;
+    animation: fadeIn 0.5s ease;
 }
 
 .bot-message {
-    background-color: #e6f3ff;
+    background-color: #e9f5ff;
     text-align: left;
+    align-self: flex-start;
+    border-top-left-radius: 0;
 }
 
 .user-message {
-    background-color: #e2fbdc;
+    background-color: #d4edda;
     text-align: right;
+    align-self: flex-end;
+    border-top-right-radius: 0;
 }
 
 .input-container {
     display: flex;
+    gap: 10px;
 }
 
 #user-input {
     flex-grow: 1;
-    padding: 10px;
+    padding: 12px;
     border: 1px solid #ddd;
-    border-radius: 5px;
-    margin-right: 5px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-family: 'Noto Sans Bengali', sans-serif;
+}
+
+#send-btn {
+    width: auto;
 }
 
 #ad-container {
-    margin-top: 20px;
+    margin-top: 25px;
     text-align: center;
     border-top: 1px dashed #ddd;
-    padding-top: 20px;
+    padding-top: 25px;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
