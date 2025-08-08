@@ -1,140 +1,176 @@
-<!DOCTYPE html>
-<html lang="bn">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>সহজ ইংরেজি শিখুন</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      background-color: #f8f8f8;
-      margin: 0;
-      padding: 0;
-    }
-    header {
-      background-color: #007bff;
-      color: white;
-      padding: 1rem;
-      text-align: center;
-    }
-    .container {
-      padding: 1rem;
-    }
-    .chat-box {
-      background-color: white;
-      padding: 1rem;
-      border-radius: 10px;
-      height: 60vh;
-      overflow-y: auto;
-      margin-bottom: 1rem;
-    }
-    .user-message, .bot-message {
-      margin: 0.5rem 0;
-      padding: 0.7rem;
-      border-radius: 10px;
-      max-width: 80%;
-    }
-    .user-message {
-      background-color: #d1f0d1;
-      text-align: right;
-      margin-left: auto;
-    }
-    .bot-message {
-      background-color: #e0e0ff;
-      text-align: left;
-    }
-    .input-row {
-      display: flex;
-      gap: 0.5rem;
-    }
-    input {
-      flex: 1;
-      padding: 0.7rem;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      font-size: 1rem;
-    }
-    button {
-      padding: 0.7rem 1rem;
-      border: none;
-      background-color: #007bff;
-      color: white;
-      border-radius: 5px;
-      font-size: 1rem;
-    }
-  </style>
-</head>
-<body>
+// OpenRouter API Key এখানে পেস্ট করা হয়েছে
+const OPENROUTER_API_KEY = "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";
+const API_URL = "https://openrouter.ai/api/v1/chat/completions";
 
-<header>
-  <h2>সহজ ইংরেজি শিখুন</h2>
-  <p>আপনার স্পোকেন ইংলিশ শেখার যাত্রা শুরু করুন।</p>
-</header>
+// HTML উপাদানগুলো নির্বাচন করা
+const lessonTitle = document.getElementById("lesson-title");
+const lessonContent = document.querySelector('.lesson-content');
+const nextLessonBtn = document.getElementById("next-lesson-btn");
+const chatBox = document.getElementById("chat-box");
+const userInput = document.getElementById("user-input");
+const sendBtn = document.getElementById("send-btn");
+const recordBtn = document.getElementById("record-btn");
 
-<div class="container">
-  <div class="chat-box" id="chat-box"></div>
+// স্পিচ সিন্থেসিস (Text-to-Speech)
+const synth = window.speechSynthesis;
 
-  <div class="input-row">
-    <input type="text" id="user-input" placeholder="এখানে টাইপ করে বলুন...">
-    <button onclick="sendMessage()">পাঠান</button>
-  </div>
-</div>
+// ফিমেল বাংলা ভয়েস খুঁজে বের করার ফাংশন
+function getBengaliFemaleVoice() {
+    const voices = synth.getVoices();
+    const femaleVoice = voices.find(voice => voice.lang === 'bn-BD' && voice.name.includes('Female')) ||
+                      voices.find(voice => voice.lang.startsWith('bn') && voice.name.includes('Female')) ||
+                      voices.find(voice => voice.lang === 'bn-IN' && voice.name.includes('Female'));
+    return femaleVoice;
+}
 
-<script>
-  const chatBox = document.getElementById("chat-box");
-  const userInput = document.getElementById("user-input");
-
-  function addMessage(text, isUser = false) {
-    const msg = document.createElement("div");
-    msg.className = isUser ? "user-message" : "bot-message";
-    msg.textContent = text;
-    chatBox.appendChild(msg);
+// চ্যাটবটে মেসেজ যোগ করার ফাংশন
+function addMessage(text, isUser = false) {
+    const message = document.createElement("p");
+    message.textContent = text;
+    message.classList.add(isUser ? "user-message" : "bot-message");
+    chatBox.appendChild(message);
     chatBox.scrollTop = chatBox.scrollHeight;
-  }
 
-  async function sendMessage() {
-    const text = userInput.value.trim();
-    if (!text) return;
+    if (!isUser && text) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'bn-BD';
+        const femaleVoice = getBengaliFemaleVoice();
+        if (femaleVoice) {
+            utterance.voice = femaleVoice;
+        } else {
+            console.warn("No Bengali female voice found. Using default voice.");
+        }
+        synth.speak(utterance);
+    }
+}
 
-    addMessage(text, true);
-    userInput.value = "";
-
-    addMessage("🤖 উত্তর আসছে, অনুগ্রহ করে অপেক্ষা করুন...", false);
+// OpenRouter থেকে নতুন পাঠ তৈরি করার ফাংশন
+async function createNewLesson() {
+    lessonTitle.textContent = "নতুন পাঠ তৈরি হচ্ছে...";
+    lessonContent.innerHTML = "<p>দয়া করে অপেক্ষা করুন...</p>";
 
     try {
-      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Authorization": "Bearer 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",
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          model: "mistralai/mistral-7b-instruct",
-          messages: [
-            { role: "system", content: "আপনি একজন বাংলা টু ইংরেজি ভার্চুয়াল শিক্ষিকা। আপনি সহজভাবে ইংরেজি শেখান।" },
-            { role: "user", content: text }
-          ]
-        })
-      });
+        const prompt = "আপনি একজন বাংলাভাষী শিক্ষার্থীদের জন্য একজন স্পোকেন ইংলিশ শিক্ষিকা। আপনার লক্ষ্য হলো একজন শিক্ষার্থীকে ধাপে ধাপে ইংরেজি শেখানো। একটি নতুন, সহজ এবং আকর্ষণীয় পাঠ তৈরি করুন। পাঠের মধ্যে একটি ইংরেজি শব্দ বা বাক্য থাকবে, তার বাংলা উচ্চারণ এবং বাংলা অর্থ থাকবে। একটি সংক্ষিপ্ত অনুশীলনও যোগ করুন। পুরো উত্তরটি বাংলায় দিন এবং আপনার উত্তরকে HTML ট্যাগ ব্যবহার করে সুন্দরভাবে সাজান।";
 
-      const data = await response.json();
+        const response = await fetch(API_URL, {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                model: "mistralai/mistral-7b-instruct",
+                messages: [
+                    { role: "system", content: "আপনি একজন বাংলা টু ইংরেজি ভার্চুয়াল শিক্ষিকা। আপনি সহজভাবে ইংরেজি শেখান।" },
+                    { role: "user", content: prompt }
+                ]
+            })
+        });
 
-      if (data.choices && data.choices[0] && data.choices[0].message) {
-        const reply = data.choices[0].message.content;
-        addMessage(reply, false);
-      } else {
-        addMessage("⚠️ দুঃখিত, কিছু ভুল হয়েছে। আবার চেষ্টা করুন।", false);
-        console.error(data);
-      }
+        const data = await response.json();
+        
+        if (data.choices && data.choices[0] && data.choices[0].message) {
+            const lessonResponse = data.choices[0].message.content;
+            lessonTitle.textContent = "নতুন পাঠ";
+            lessonContent.innerHTML = lessonResponse;
+            addMessage("নতুন পাঠ তৈরি হয়েছে। অনুগ্রহ করে অনুশীলন শুরু করুন।", false);
+        } else {
+            addMessage("⚠️ দুঃখিত, পাঠ তৈরি করা সম্ভব হয়নি।", false);
+            console.error("OpenRouter API Error:", data);
+        }
 
-    } catch (err) {
-      console.error(err);
-      addMessage("❌ নেটওয়ার্ক বা API সমস্যা হয়েছে।", false);
+    } catch (error) {
+        console.error("OpenRouter API Error:", error);
+        addMessage("দুঃখিত, পাঠ তৈরি করা সম্ভব হয়নি। আপনার API Key বা ইন্টারনেট সংযোগে সমস্যা হতে পারে।", false);
+        lessonTitle.textContent = "দুঃখিত!";
+        lessonContent.innerHTML = "<p>নতুন পাঠ তৈরি করা সম্ভব হয়নি। আবার চেষ্টা করুন।</p>";
     }
-  }
+}
 
-  addMessage("👋 শুভ সকাল! আমি আপনার ভার্চুয়াল শিক্ষিকা। ইংরেজি অনুশীলন শুরু করুন।", false);
-</script>
+// ব্যবহারকারীর ইনপুট পাঠানোর ফাংশন (টাইপ করে)
+sendBtn.addEventListener("click", async () => {
+    const userMessage = userInput.value;
+    if (userMessage.trim() === "") return;
 
-</body>
-</html>
+    addMessage(userMessage, true);
+    userInput.value = "";
+    
+    try {
+        const prompt = `আপনি একজন বাংলাভাষী স্পোকেন ইংলিশ শিক্ষিকা। একজন শিক্ষার্থী আপনাকে বলছে: "${userMessage}"। তার উত্তরটি একজন শিক্ষিকার মতো দিন। প্রথমত, তার ভুলগুলো খুঁজে বের করুন এবং সেগুলো সহজ বাংলায় বুঝিয়ে দিন। এরপর সঠিক বাক্যটি দিন এবং তাকে আরও একটি অনুশীলনের জন্য একটি নতুন প্রশ্ন বা বাক্য দিন।`;
+        
+        const response = await fetch(API_URL, {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                model: "mistralai/mistral-7b-instruct",
+                messages: [
+                    { role: "system", content: "আপনি একজন বাংলা টু ইংরেজি ভার্চুয়াল শিক্ষিকা। আপনি সহজভাবে ইংরেজি শেখান।" },
+                    { role: "user", content: prompt }
+                ]
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.choices && data.choices[0] && data.choices[0].message) {
+            const botResponse = data.choices[0].message.content;
+            addMessage(botResponse, false);
+        } else {
+            addMessage("⚠️ দুঃখিত, কিছু ভুল হয়েছে। আবার চেষ্টা করুন।", false);
+            console.error("OpenRouter API Error:", data);
+        }
+
+    } catch (error) {
+        console.error("OpenRouter API Error:", error);
+        addMessage("দুঃখিত, কোনো ভুল হয়েছে। আপনার API Key বা ইন্টারনেট সংযোগে সমস্যা হতে পারে।", false);
+    }
+});
+
+
+// স্পিচ টু টেক্সট ফিচার
+const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+recognition.lang = 'en-US'; 
+recognition.interimResults = false;
+recognition.maxAlternatives = 1;
+
+recordBtn.addEventListener('click', () => {
+    const isRecording = recordBtn.classList.contains('recording');
+    if (isRecording) {
+        recognition.stop();
+    } else {
+        recordBtn.classList.add('recording');
+        recordBtn.style.backgroundColor = '#2ecc71'; 
+        addMessage("আপনার কথা শোনা হচ্ছে...", false);
+        recognition.start();
+    }
+});
+
+recognition.addEventListener('result', async (event) => {
+    const transcript = event.results[0][0].transcript;
+    userInput.value = transcript;
+    sendBtn.click();
+});
+
+recognition.addEventListener('end', () => {
+    recordBtn.classList.remove('recording');
+    recordBtn.style.backgroundColor = '#e74c3c';
+});
+
+recognition.addEventListener('error', (event) => {
+    console.error('Speech recognition error', event);
+    recordBtn.classList.remove('recording');
+    recordBtn.style.backgroundColor = '#e74c3c';
+    addMessage("দুঃখিত, আপনার কথা শুনতে পাইনি। অনুগ্রহ করে আবার চেষ্টা করুন।", false);
+});
+
+// পরবর্তী পাঠে যাওয়ার ফাংশন
+nextLessonBtn.addEventListener("click", () => {
+    createNewLesson();
+});
+
+// প্রথমবার পেজ লোড হলে
+addMessage("শুভ সকাল! আমি আপনার ভার্চুয়াল শিক্ষিকা। ইংরেজি অনুশীলন করতে শুরু করুন।", false);
+createNewLesson();
