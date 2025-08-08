@@ -13,6 +13,14 @@ const sendBtn = document.getElementById("send-btn");
 // স্পিচ সিন্থেসিস (Text-to-Speech)
 const synth = window.speechSynthesis;
 
+// ফিমেল বাংলা ভয়েস খুঁজে বের করার ফাংশন
+function getBengaliFemaleVoice() {
+    const voices = synth.getVoices();
+    return voices.find(voice => voice.lang === 'bn-BD' && voice.name.includes('Female')) ||
+           voices.find(voice => voice.lang.startsWith('bn') && voice.name.includes('Female')) ||
+           voices.find(voice => voice.lang === 'bn-IN' && voice.name.includes('Female'));
+}
+
 // চ্যাটবটে মেসেজ যোগ করার ফাংশন
 function addMessage(text, isUser = false) {
     const message = document.createElement("p");
@@ -20,11 +28,14 @@ function addMessage(text, isUser = false) {
     message.classList.add(isUser ? "user-message" : "bot-message");
     chatBox.appendChild(message);
     chatBox.scrollTop = chatBox.scrollHeight;
-    
+
     if (!isUser) {
-        // যদি এটি বটের মেসেজ হয়, তাহলে তা পাঠ করে শোনাবে
         const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'bn-BD'; // বাংলা ভাষা
+        utterance.lang = 'bn-BD';
+        const femaleVoice = getBengaliFemaleVoice();
+        if (femaleVoice) {
+            utterance.voice = femaleVoice;
+        }
         synth.speak(utterance);
     }
 }
@@ -33,10 +44,10 @@ function addMessage(text, isUser = false) {
 async function createNewLesson() {
     lessonTitle.textContent = "নতুন পাঠ তৈরি হচ্ছে...";
     lessonContent.innerHTML = "<p>দয়া করে অপেক্ষা করুন...</p>";
-    
+
     try {
-        const prompt = "আপনি একজন বাংলাভাষী শিক্ষার্থীদের জন্য একজন স্পোকেন ইংলিশ শিক্ষক। একটি নতুন পাঠ তৈরি করুন। পাঠের মধ্যে একটি ইংরেজি শব্দ বা বাক্য থাকবে, তার বাংলা উচ্চারণ এবং বাংলা অর্থ থাকবে। একটি সংক্ষিপ্ত অনুশীলনও যোগ করুন।";
-        
+        const prompt = "আপনি একজন বাংলাভাষী শিক্ষার্থীদের জন্য একজন স্পোকেন ইংলিশ শিক্ষিকা। আপনার লক্ষ্য হলো একজন শিক্ষার্থীকে ধাপে ধাপে ইংরেজি শেখানো। একটি নতুন, সহজ এবং আকর্ষণীয় পাঠ তৈরি করুন। পাঠের মধ্যে একটি ইংরেজি শব্দ বা বাক্য থাকবে, তার বাংলা উচ্চারণ এবং বাংলা অর্থ থাকবে। একটি সংক্ষিপ্ত অনুশীলনও যোগ করুন। পুরো উত্তরটি বাংলায় দিন এবং আপনার উত্তরকে HTML ট্যাগ ব্যবহার করে সুন্দরভাবে সাজান।";
+
         const response = await fetch(API_URL, {
             method: 'POST',
             headers: {
@@ -48,10 +59,10 @@ async function createNewLesson() {
                 }]
             })
         });
-        
+
         const data = await response.json();
         const lessonResponse = data.candidates[0].content.parts[0].text;
-        
+
         lessonTitle.textContent = "নতুন পাঠ";
         lessonContent.innerHTML = lessonResponse;
 
@@ -69,10 +80,10 @@ sendBtn.addEventListener("click", async () => {
 
     addMessage(userMessage, true);
     userInput.value = "";
-    
+
     try {
-        const prompt = `আপনি একজন বাংলাভাষী স্পোকেন ইংলিশ শিক্ষক। একজন শিক্ষার্থী আপনাকে বলছে: "${userMessage}"। তার উত্তরটি একজন শিক্ষকের মতো দিন। প্রথমত, তার ভুলগুলো খুঁজে বের করুন এবং সেগুলো সহজ বাংলায় বুঝিয়ে দিন। এরপর সঠিক বাক্যটি দিন এবং তাকে আরও একটি অনুশীলনের জন্য একটি নতুন প্রশ্ন বা বাক্য দিন।`;
-        
+        const prompt = `আপনি একজন বাংলাভাষী স্পোকেন ইংলিশ শিক্ষিকা। একজন শিক্ষার্থী আপনাকে বলছে: "${userMessage}"। তার উত্তরটি একজন শিক্ষিকার মতো দিন। প্রথমত, তার ভুলগুলো খুঁজে বের করুন এবং সেগুলো সহজ বাংলায় বুঝিয়ে দিন। এরপর সঠিক বাক্যটি দিন এবং তাকে আরও একটি অনুশীলনের জন্য একটি নতুন প্রশ্ন বা বাক্য দিন।`;
+
         const response = await fetch(API_URL, {
             method: 'POST',
             headers: {
@@ -101,7 +112,7 @@ nextLessonBtn.addEventListener("click", () => {
 });
 
 // প্রথমবার পেজ লোড হলে একটি প্রাথমিক মেসেজ দেখানো
-addMessage("শুভ সকাল! আমি আপনার ভার্চুয়াল শিক্ষক। পরবর্তী পাঠের জন্য 'পরবর্তী পাঠ' বাটনে ক্লিক করুন।", false);
+addMessage("শুভ সকাল! আমি আপনার ভার্চুয়াল শিক্ষিকা। ইংরেজি অনুশীলন করতে শুরু করুন।", false);
 
 // প্রথমবার পেজ লোড হলে একটি পাঠ তৈরি করা
 createNewLesson();
