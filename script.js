@@ -1,79 +1,17 @@
 // আপনার Google Gemini API Key এখানে পেস্ট করুন
 const GEMINI_API_KEY = "AIzaSyC3bmWu50URTnT0jiek3WRV4rgJf8fvhis";
-
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
-
-// কোর্সের বিষয়বস্তু
-const lessons = [
-    {
-        title: "পাঠ ১: সাধারণ অভিবাদন (Greetings)",
-        content: `
-            <p>ইংরেজিতে কথা বলা শুরু করার জন্য কিছু সাধারণ অভিবাদন জানা খুব জরুরি।</p>
-            <ul>
-                <li>Hello! (হ্যালো!) - সাধারণ অভিবাদন।</li>
-                <li>Hi! (হাই!) - অনানুষ্ঠানিক অভিবাদন।</li>
-                <li>Good morning! (গুড মর্নিং!) - শুভ সকাল।</li>
-                <li>Good afternoon! (গুড আফটারনুন!) - শুভ দুপুর।</li>
-                <li>Good evening! (গুড ইভিনিং!) - শুভ সন্ধ্যা।</li>
-            </ul>
-            <p>অনুশীলন: একটি অভিবাদন বেছে নিয়ে বলুন এবং আপনার ভার্চুয়াল শিক্ষককে পাঠান।</p>
-        `
-    },
-    {
-        title: "পাঠ ২: নিজের পরিচয় দেওয়া (Introducing Yourself)",
-        content: `
-            <p>এই পাঠে আমরা শিখব কীভাবে ইংরেজিতে নিজের পরিচয় দিতে হয়।</p>
-            <ul>
-                <li>My name is [আপনার নাম]. (মাই নেম ইজ [আপনার নাম]) - আমার নাম...</li>
-                <li>I am [আপনার নাম]. (আই অ্যাম [আপনার নাম]) - আমি...</li>
-                <li>I am from [আপনার দেশ/শহর]. (আই অ্যাম ফ্রম [আপনার দেশ/শহর]) - আমি... থেকে এসেছি।</li>
-            </ul>
-            <p>অনুশীলন: আপনার নাম ও কোথা থেকে এসেছেন তা ইংরেজিতে লিখে পাঠান।</p>
-        `
-    },
-    {
-        title: "পাঠ ৩: প্রশ্ন করা (Asking Questions)",
-        content: `
-            <p>ইংরেজিতে সাধারণ প্রশ্ন করা শিখুন।</p>
-            <ul>
-                <li>How are you? (হাউ আর ইউ?) - আপনি কেমন আছেন?</li>
-                <li>What is your name? (হোয়াট ইজ ইউর নেম?) - তোমার নাম কী?</li>
-                <li>Where are you from? (হোয়্যার আর ইউ ফ্রম?) - তুমি কোথা থেকে এসেছো?</li>
-            </ul>
-            <p>অনুশীলন: আপনার ভার্চুয়াল শিক্ষককে একটি সাধারণ প্রশ্ন করুন।</p>
-        `
-    }
-    // আপনি এখানে আরও পাঠ যোগ করতে পারেন
-];
-
-let currentLessonIndex = 0;
 
 // HTML উপাদানগুলো নির্বাচন করা
 const lessonTitle = document.getElementById("lesson-title");
-const lessonContent = document.getElementById("lesson-content");
+const lessonContent = document.querySelector('.lesson-content');
 const nextLessonBtn = document.getElementById("next-lesson-btn");
 const chatBox = document.getElementById("chat-box");
 const userInput = document.getElementById("user-input");
 const sendBtn = document.getElementById("send-btn");
 
-// পাঠ লোড করার ফাংশন
-function loadLesson(index) {
-    const lesson = lessons[index];
-    lessonTitle.textContent = lesson.title;
-    // এখানে lessonContent এর পরিবর্তে course-section এর div-এর মধ্যে content যোগ করতে হবে
-    document.querySelector('.lesson-content').innerHTML = lesson.content;
-}
-
-// পরবর্তী পাঠে যাওয়ার ফাংশন
-nextLessonBtn.addEventListener("click", () => {
-    currentLessonIndex++;
-    if (currentLessonIndex < lessons.length) {
-        loadLesson(currentLessonIndex);
-    } else {
-        alert("কোর্স সম্পন্ন! আরও পাঠ খুব শীঘ্রই আসবে।");
-        nextLessonBtn.disabled = true;
-    }
-});
+// স্পিচ সিন্থেসিস (Text-to-Speech)
+const synth = window.speechSynthesis;
 
 // চ্যাটবটে মেসেজ যোগ করার ফাংশন
 function addMessage(text, isUser = false) {
@@ -81,7 +19,47 @@ function addMessage(text, isUser = false) {
     message.textContent = text;
     message.classList.add(isUser ? "user-message" : "bot-message");
     chatBox.appendChild(message);
-    chatBox.scrollTop = chatBox.scrollHeight; // স্ক্রল নিচে নামানো
+    chatBox.scrollTop = chatBox.scrollHeight;
+    
+    if (!isUser) {
+        // যদি এটি বটের মেসেজ হয়, তাহলে তা পাঠ করে শোনাবে
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'bn-BD'; // বাংলা ভাষা
+        synth.speak(utterance);
+    }
+}
+
+// Gemini থেকে নতুন পাঠ তৈরি করার ফাংশন
+async function createNewLesson() {
+    lessonTitle.textContent = "নতুন পাঠ তৈরি হচ্ছে...";
+    lessonContent.innerHTML = "<p>দয়া করে অপেক্ষা করুন...</p>";
+    
+    try {
+        const prompt = "আপনি একজন বাংলাভাষী শিক্ষার্থীদের জন্য একজন স্পোকেন ইংলিশ শিক্ষক। একটি নতুন পাঠ তৈরি করুন। পাঠের মধ্যে একটি ইংরেজি শব্দ বা বাক্য থাকবে, তার বাংলা উচ্চারণ এবং বাংলা অর্থ থাকবে। একটি সংক্ষিপ্ত অনুশীলনও যোগ করুন।";
+        
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                contents: [{
+                    parts: [{text: prompt}]
+                }]
+            })
+        });
+        
+        const data = await response.json();
+        const lessonResponse = data.candidates[0].content.parts[0].text;
+        
+        lessonTitle.textContent = "নতুন পাঠ";
+        lessonContent.innerHTML = lessonResponse;
+
+    } catch (error) {
+        console.error("Gemini API Error:", error);
+        lessonTitle.textContent = "দুঃখিত!";
+        lessonContent.innerHTML = "<p>নতুন পাঠ তৈরি করা সম্ভব হয়নি। আবার চেষ্টা করুন।</p>";
+    }
 }
 
 // ব্যবহারকারীর ইনপুট পাঠানোর ফাংশন
@@ -92,8 +70,9 @@ sendBtn.addEventListener("click", async () => {
     addMessage(userMessage, true);
     userInput.value = "";
     
-    // Gemini API-কে প্রশ্ন পাঠানো
     try {
+        const prompt = `আপনি একজন বাংলাভাষী স্পোকেন ইংলিশ শিক্ষক। একজন শিক্ষার্থী আপনাকে বলছে: "${userMessage}"। তার উত্তরটি একজন শিক্ষকের মতো দিন। প্রথমত, তার ভুলগুলো খুঁজে বের করুন এবং সেগুলো সহজ বাংলায় বুঝিয়ে দিন। এরপর সঠিক বাক্যটি দিন এবং তাকে আরও একটি অনুশীলনের জন্য একটি নতুন প্রশ্ন বা বাক্য দিন।`;
+        
         const response = await fetch(API_URL, {
             method: 'POST',
             headers: {
@@ -101,7 +80,7 @@ sendBtn.addEventListener("click", async () => {
             },
             body: JSON.stringify({
                 contents: [{
-                    parts: [{text: `আপনি একজন বাংলাভাষী স্পোকেন ইংলিশ শিক্ষক। একজন শিক্ষার্থী আপনাকে বলছে: ${userMessage}। তার উত্তরটি খুব সহজে বাংলায় বুঝিয়ে দিন এবং যদি কোনো ভুল থাকে তবে তা সংশোধন করে দিন।`}]
+                    parts: [{text: prompt}]
                 }]
             })
         });
@@ -116,5 +95,13 @@ sendBtn.addEventListener("click", async () => {
     }
 });
 
-// প্রথম পাঠ লোড করা
-loadLesson(currentLessonIndex);
+// পরবর্তী পাঠে যাওয়ার ফাংশন
+nextLessonBtn.addEventListener("click", () => {
+    createNewLesson();
+});
+
+// প্রথমবার পেজ লোড হলে একটি প্রাথমিক মেসেজ দেখানো
+addMessage("শুভ সকাল! আমি আপনার ভার্চুয়াল শিক্ষক। পরবর্তী পাঠের জন্য 'পরবর্তী পাঠ' বাটনে ক্লিক করুন।", false);
+
+// প্রথমবার পেজ লোড হলে একটি পাঠ তৈরি করা
+createNewLesson();
