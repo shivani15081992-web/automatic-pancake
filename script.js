@@ -1,7 +1,65 @@
-// OpenRouter API Key এখানে পেস্ট করা হয়েছে
-const OPENROUTER_API_KEY = "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";
+// OpenRouter API Key এখানে পেস্ট করা হয়েছে (English teacher key)
+const OPENROUTER_API_KEY = "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";
 const API_URL = "https://openrouter.ai/api/v1/chat/completions";
 const MODEL_NAME = "mistralai/mistral-7b-instruct";
+
+// যদি API কাজ না করে, তাহলে ব্যবহারের জন্য কিছু আগে থেকে তৈরি করা পাঠ।
+const fallbackLessons = [
+    {
+        title: "পাঠ ১: গ্রিটিংস (Greetings)",
+        content: `<h3>আজকের শব্দ: Hello!</h3>
+        <p><b>Hello</b> (হ্যালো)লো)<br>
+        <b>বাংলা অর্থ:</b> অভিবাদন! / ওহে! / কেমন আছেন? (সাধারণ অর্থ)</p>
+        <p><b>ব্যবহার:</b> যখন আপনি কারো সাথে প্রথম দেখা করেন বা কারো মনোযোগ আকর্ষণ করতে চান, তখন আপনি "Hello!" বলতে পারেন।</p>
+        <p><b>উদাহরণ:</b><br>
+        • Hello, how are you?<br>
+        • Hello, is anyone there?</p>
+        <h3>আজকের বাক্য: What is your name?</h3>
+        <p><b>What is your name?</b> (হোয়াট ইজ ইওর নেইম?)<br>
+        <b>বাংলা অর্থ:</b> আপনার নাম কী?</p>
+        <p><b>ব্যবহার:</b> কারো নাম জানতে আপনি এই বাক্যটি ব্যবহার করতে পারেন।</p>
+        <p><b>উদাহরণ:</b><br>
+        • Hello, what is your name?<br>
+        • If someone asks you "What is your name?", you can answer "My name is [আপনার নাম]"</p>
+        `
+    },
+    {
+        title: "পাঠ ২: নিজেকে পরিচয় করানো (Introducing yourself)",
+        content: `<h3>আজকের শব্দ: My name is...</h3>
+        <p><b>My name is...</b> (মাই নেইম ইজ...)<br>
+        <b>বাংলা অর্থ:</b> আমার নাম হয়...</p>
+        <p><b>ব্যবহার:</b> আপনি যখন আপনার নাম বলবেন, তখন এই বাক্যটি ব্যবহার করবেন।</p>
+        <p><b>উদাহরণ:</b><br>
+        • My name is Rima.<br>
+        • My name is Rohan.</p>
+        <h3>আজকের বাক্য: Where are you from?</h3>
+        <p><b>Where are you from?</b> (হোয়্যার আর ইউ ফ্রম?)<br>
+        <b>বাংলা অর্থ:</b> আপনি কোথা থেকে এসেছেন?</p>
+        <p><b>ব্যবহার:</b> কারো দেশ বা শহর জানতে এই বাক্যটি ব্যবহার করুন।</p>
+        <p><b>উদাহরণ:</b><br>
+        • Where are you from? I am from Bangladesh.</p>
+        `
+    },
+    {
+        title: "পাঠ ৩: প্রশ্ন করা (Asking Questions)",
+        content: `<h3>আজকের শব্দ: How are you?</h3>
+        <p><b>How are you?</b> (হাউ আর ইউ?)<br>
+        <b>বাংলা অর্থ:</b> আপনি কেমন আছেন?</p>
+        <p><b>ব্যবহার:</b> কারো খোঁজ-খবর নিতে এই বাক্যটি ব্যবহার করতে পারেন।</p>
+        <p><b>উদাহরণ:</b><br>
+        • Hello, how are you?<br>
+        • I am fine, thank you. How are you?</p>
+        <h3>আজকের বাক্য: What do you do?</h3>
+        <p><b>What do you do?</b> (হোয়াট ডু ইউ ডু?)<br>
+        <b>বাংলা অর্থ:</b> আপনি কী করেন?</p>
+        <p><b>ব্যবহার:</b> কারো পেশা বা কাজ সম্পর্কে জানতে এই বাক্যটি ব্যবহার করুন।</p>
+        <p><b>উদাহরণ:</b><br>
+        • What do you do? I am a student.</p>
+        `
+    }
+];
+
+let fallbackLessonIndex = 0; // ফলব্যাক পাঠের জন্য সূচক
 
 // HTML উপাদানগুলো নির্বাচন করা
 const lessonTitle = document.getElementById("lesson-title");
@@ -20,7 +78,8 @@ function getBengaliFemaleVoice() {
     const voices = synth.getVoices();
     const femaleVoice = voices.find(voice => voice.lang === 'bn-BD' && voice.name.includes('Female')) ||
                       voices.find(voice => voice.lang.startsWith('bn') && voice.name.includes('Female')) ||
-                      voices.find(voice => voice.lang === 'bn-IN' && voice.name.includes('Female'));
+                      voices.find(voice => voices.length > 0 && voices[0].name.includes('Female')) || // Fallback
+                      voices.find(voice => voices.length > 0);
     return femaleVoice;
 }
 
@@ -45,7 +104,7 @@ function addMessage(text, isUser = false) {
     }
 }
 
-// OpenRouter থেকে নতুন পাঠ তৈরি করার ফাংশন
+// OpenRouter থেকে নতুন পাঠ তৈরি করার ফাংশন (অথবা ফলব্যাক)
 async function createNewLesson() {
     lessonTitle.textContent = "নতুন পাঠ তৈরি হচ্ছে...";
     lessonContent.innerHTML = "<p>দয়া করে অপেক্ষা করুন...</p>";
@@ -76,17 +135,21 @@ async function createNewLesson() {
             lessonContent.innerHTML = lessonResponse;
             addMessage("নতুন পাঠ তৈরি হয়েছে। অনুগ্রহ করে অনুশীলন শুরু করুন।", false);
         } else {
-            addMessage("⚠️ দুঃখিত, পাঠ তৈরি করা সম্ভব হয়নি।", false);
-            console.error("OpenRouter API Error:", data);
-            lessonTitle.textContent = "দুঃখিত!";
-            lessonContent.innerHTML = "<p>নতুন পাঠ তৈরি করা সম্ভব হয়নি। আবার চেষ্টা করুন।</p>";
+            // API থেকে ভুল উত্তর এলে ফলব্যাক ব্যবহার
+            throw new Error("API response error");
         }
 
     } catch (error) {
-        console.error("OpenRouter API Error:", error);
-        addMessage("দুঃখিত, পাঠ তৈরি করা সম্ভব হয়নি। আপনার API Key বা ইন্টারনেট সংযোগে সমস্যা হতে পারে।", false);
-        lessonTitle.textContent = "দুঃখিত!";
-        lessonContent.innerHTML = "<p>নতুন পাঠ তৈরি করা সম্ভব হয়নি। আবার চেষ্টা করুন।</p>";
+        console.error("API Error or Network issue:", error);
+        
+        // API কল ব্যর্থ হলে ফলব্যাক পাঠ লোড করুন
+        const currentLesson = fallbackLessons[fallbackLessonIndex];
+        lessonTitle.textContent = currentLesson.title;
+        lessonContent.innerHTML = currentLesson.content;
+        addMessage("ইন্টারনেটে সমস্যা হচ্ছে। আপনার জন্য একটি অফলাইন পাঠ লোড করা হয়েছে।", false);
+        
+        // পরের বারের জন্য ফলব্যাক সূচক আপডেট করুন
+        fallbackLessonIndex = (fallbackLessonIndex + 1) % fallbackLessons.length;
     }
 }
 
