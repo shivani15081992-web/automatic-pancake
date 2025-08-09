@@ -1,191 +1,41 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Noto+Sans+Bengali:wght@400;500;700&display=swap');
-
-body {
-    font-family: 'Noto Sans Bengali', sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f0f2f5;
-    color: #333;
-    display: flex;
-    justify-content: center;
-    min-height: 100vh;
+/* Mobile-first clean UI */
+:root{
+  --bg:#f6f7fb;
+  --card:#ffffff;
+  --accent:#0b6cff;
+  --muted:#6b7280;
 }
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;font-family:Inter, Noto Sans Bengali, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial}
+body{background:linear-gradient(180deg,var(--bg),#fff);color:#111}
+.app{max-width:640px;margin:0 auto;padding:12px;min-height:100vh;display:flex;flex-direction:column}
+.header{padding:14px 8px}
+.header h1{margin:0;font-size:20px}
+.header .subtitle{margin:6px 0 0;color:var(--muted);font-size:13px}
 
-.container {
-    width: 100%;
-    max-width: 600px;
-    background-color: #ffffff;
-    padding: 25px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    box-sizing: border-box;
-    border-radius: 12px;
-    margin: 20px;
-}
+.auth{background:var(--card);padding:14px;border-radius:12px;box-shadow:0 6px 18px rgba(11,108,255,0.06);margin-bottom:12px}
+.note{font-size:13px;color:var(--muted);margin-top:8px}
 
-header {
-    text-align: center;
-    padding-bottom: 20px;
-    border-bottom: 2px solid #e0e0e0;
-    margin-bottom: 20px;
-}
+.lesson{flex:1;display:flex;flex-direction:column}
+.user-info{display:flex;align-items:center;gap:10px;padding:10px;background:linear-gradient(90deg,#fff,#fbfdff);border-radius:10px}
+.user-info img{width:44px;height:44px;border-radius:50%;object-fit:cover}
+.user-name{font-weight:600}
+.user-email{font-size:12px;color:var(--muted)}
+.link{margin-left:auto;background:none;border:0;color:var(--accent);cursor:pointer}
 
-h1 {
-    font-family: 'Poppins', sans-serif;
-    color: #2c3e50;
-    font-size: 2em;
-    margin: 0;
-    font-weight: 700;
-}
+.chat{flex:1;overflow:auto;padding:10px;margin-top:12px}
+.msg{max-width:82%;padding:10px;border-radius:12px;margin-bottom:10px;line-height:1.4}
+.msg.user{margin-left:auto;background:#e6fff4}
+.msg.bot{background:#f1f6ff}
+.msg .meta{font-size:11px;color:var(--muted);margin-bottom:6px}
 
-p {
-    font-size: 1em;
-    color: #6c757d;
-}
+.chat-form{display:flex;gap:8px;padding:10px;background:transparent}
+.chat-form input{flex:1;padding:12px;border-radius:999px;border:1px solid #e6e9ef;font-size:15px}
+.chat-form button{padding:10px 14px;border-radius:999px;border:0;background:var(--accent);color:white}
 
-h2 {
-    font-family: 'Poppins', sans-serif;
-    color: #34495e;
-    border-bottom: 1px solid #ddd;
-    padding-bottom: 10px;
-    margin-top: 30px;
-    font-weight: 600;
-}
+.controls{display:flex;gap:8px;padding:10px}
+.controls button{flex:1;padding:10px;border-radius:10px;border:0;background:#eef3ff;color:var(--accent)}
 
-#lesson-content {
-    background-color: #f8f9fa;
-    padding: 20px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-}
+.footer{text-align:center;padding:12px;color:var(--muted);font-size:12px}
 
-#lesson-content h3 {
-    font-family: 'Poppins', sans-serif;
-    color: #007bff;
-}
-
-#lesson-content ul {
-    list-style-type: none;
-    padding: 0;
-}
-
-#lesson-content li {
-    background-color: #e9ecef;
-    padding: 10px;
-    border-radius: 5px;
-    margin-bottom: 8px;
-}
-
-#next-lesson-btn {
-    width: 100%;
-    padding: 12px;
-    font-size: 16px;
-    font-weight: bold;
-    color: #fff;
-    background-color: #007bff;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    font-family: 'Noto Sans Bengali', sans-serif;
-}
-
-#next-lesson-btn:hover {
-    background-color: #0056b3;
-}
-
-#next-lesson-btn:active {
-    background-color: #004494;
-}
-
-#chat-box {
-    border: 1px solid #ddd;
-    padding: 15px;
-    height: 350px;
-    overflow-y: auto;
-    margin-bottom: 15px;
-    border-radius: 8px;
-    display: flex;
-    flex-direction: column;
-}
-
-.bot-message, .user-message {
-    padding: 12px;
-    margin-bottom: 10px;
-    border-radius: 10px;
-    max-width: 80%;
-    word-wrap: break-word;
-    animation: fadeIn 0.5s ease;
-}
-
-.bot-message {
-    background-color: #e9f5ff;
-    text-align: left;
-    align-self: flex-start;
-    border-top-left-radius: 0;
-}
-
-.user-message {
-    background-color: #d4edda;
-    text-align: right;
-    align-self: flex-end;
-    border-top-right-radius: 0;
-}
-
-.input-container {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-}
-
-#user-input {
-    flex-grow: 1;
-    padding: 12px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    font-size: 16px;
-    font-family: 'Noto Sans Bengali', sans-serif;
-}
-
-#send-btn, #record-btn {
-    background-color: #28a745;
-    color: #fff;
-    border: none;
-    padding: 12px 18px;
-    font-size: 16px;
-    cursor: pointer;
-    border-radius: 8px;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-    font-family: 'Noto Sans Bengali', sans-serif;
-}
-
-#send-btn {
-    background-color: #007bff;
-}
-
-#record-btn {
-    padding: 12px;
-}
-
-#record-btn svg {
-    vertical-align: middle;
-}
-
-#send-btn:disabled, #record-btn:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
-}
-
-.recording {
-    background-color: #e74c3c !important;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
+@media(min-width:720px){.app{padding:24px}}
