@@ -1,242 +1,154 @@
-// OpenRouter API Key এখানে পেস্ট করা হয়েছে (English teacher key)
-const OPENROUTER_API_KEY = "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";
-const API_URL = "https://openrouter.ai/api/v1/chat/completions";
-const MODEL_NAME = "mistralai/mistral-7b-instruct";
+/*
+  script.js
+  Flow summary:
+  - Use Google Identity Services (GSI) to sign-in the user and obtain a credential (JWT).
+  - Send the credential to the Google Apps Script web app endpoint (backend) to exchange for access_token and to proxy Gemini calls.
+  - Backend will call Gemini API with the customer's token (acting on user's behalf) and return responses.
+  - Frontend renders chat and course content.
 
-// যদি API কাজ না করে, তাহলে ব্যবহারের জন্য কিছু আগে থেকে তৈরি করা পাঠ।
-const fallbackLessons = [
-    {
-        title: "পাঠ ১: গ্রিটিংস (Greetings)",
-        content: `<h3>আজকের শব্দ: Hello!</h3>
-        <p><b>Hello</b> (হ্যালো)লো)<br>
-        <b>বাংলা অর্থ:</b> অভিবাদন! / ওহে! / কেমন আছেন? (সাধারণ অর্থ)</p>
-        <p><b>ব্যবহার:</b> যখন আপনি কারো সাথে প্রথম দেখা করেন বা কারো মনোযোগ আকর্ষণ করতে চান, তখন আপনি "Hello!" বলতে পারেন।</p>
-        <p><b>উদাহরণ:</b><br>
-        • Hello, how are you?<br>
-        • Hello, is anyone there?</p>
-        <h3>আজকের বাক্য: What is your name?</h3>
-        <p><b>What is your name?</b> (হোয়াট ইজ ইওর নেইম?)<br>
-        <b>বাংলা অর্থ:</b> আপনার নাম কী?</p>
-        <p><b>ব্যবহার:</b> কারো নাম জানতে আপনি এই বাক্যটি ব্যবহার করতে পারেন।</p>
-        <p><b>উদাহরণ:</b><br>
-        • Hello, what is your name?<br>
-        • If someone asks you "What is your name?", you can answer "My name is [আপনার নাম]"</p>
-        `
-    },
-    {
-        title: "পাঠ ২: নিজেকে পরিচয় করানো (Introducing yourself)",
-        content: `<h3>আজকের শব্দ: My name is...</h3>
-        <p><b>My name is...</b> (মাই নেইম ইজ...)<br>
-        <b>বাংলা অর্থ:</b> আমার নাম হয়...</p>
-        <p><b>ব্যবহার:</b> আপনি যখন আপনার নাম বলবেন, তখন এই বাক্যটি ব্যবহার করবেন।</p>
-        <p><b>উদাহরণ:</b><br>
-        • My name is Rima.<br>
-        • My name is Rohan.</p>
-        <h3>আজকের বাক্য: Where are you from?</h3>
-        <p><b>Where are you from?</b> (হোয়্যার আর ইউ ফ্রম?)<br>
-        <b>বাংলা অর্থ:</b> আপনি কোথা থেকে এসেছেন?</p>
-        <p><b>ব্যবহার:</b> কারো দেশ বা শহর জানতে এই বাক্যটি ব্যবহার করুন।</p>
-        <p><b>উদাহরণ:</b><br>
-        • Where are you from? I am from Bangladesh.</p>
-        `
-    },
-    {
-        title: "পাঠ ৩: প্রশ্ন করা (Asking Questions)",
-        content: `<h3>আজকের শব্দ: How are you?</h3>
-        <p><b>How are you?</b> (হাউ আর ইউ?)<br>
-        <b>বাংলা অর্থ:</b> আপনি কেমন আছেন?</p>
-        <p><b>ব্যবহার:</b> কারো খোঁজ-খবর নিতে এই বাক্যটি ব্যবহার করতে পারেন।</p>
-        <p><b>উদাহরণ:</b><br>
-        • Hello, how are you?<br>
-        • I am fine, thank you. How are you?</p>
-        <h3>আজকের বাক্য: What do you do?</h3>
-        <p><b>What do you do?</b> (হোয়াট ডু ইউ ডু?)<br>
-        <b>বাংলা অর্থ:</b> আপনি কী করেন?</p>
-        <p><b>ব্যবহার:</b> কারো পেশা বা কাজ সম্পর্কে জানতে এই বাক্যটি ব্যবহার করুন।</p>
-        <p><b>উদাহরণ:</b><br>
-        • What do you do? I am a student.</p>
-        `
-    }
-];
+  IMPORTANT: You must deploy backend.gs as a Web App (Execute as: Me, Who has access: Anyone) AND configure OAuth in Google Cloud Console.
 
-let fallbackLessonIndex = 0; // ফলব্যাক পাঠের জন্য সূচক
+  Replace placeholders: CLIENT_ID and BACKEND_URL
+*/
 
-// HTML উপাদানগুলো নির্বাচন করা
-const lessonTitle = document.getElementById("lesson-title");
-const lessonContent = document.querySelector('.lesson-content');
-const nextLessonBtn = document.getElementById("next-lesson-btn");
-const chatBox = document.getElementById("chat-box");
-const userInput = document.getElementById("user-input");
-const sendBtn = document.getElementById("send-btn");
-const recordBtn = document.getElementById("record-btn");
+const CLIENT_ID = 'REPLACE_WITH_CLIENT_ID.apps.googleusercontent.com';
+const BACKEND_URL = 'REPLACE_WITH_BACKEND_DEPLOY_URL'; // Google Apps Script web app URL
 
-// স্পিচ সিন্থেসিস (Text-to-Speech)
-const synth = window.speechSynthesis;
+let currentProfile = null;
 
-// ফিমেল বাংলা ভয়েস খুঁজে বের করার ফাংশন
-function getBengaliFemaleVoice() {
-    const voices = synth.getVoices();
-    const femaleVoice = voices.find(voice => voice.lang === 'bn-BD' && voice.name.includes('Female')) ||
-                      voices.find(voice => voice.lang.startsWith('bn') && voice.name.includes('Female')) ||
-                      voices.find(voice => voices.length > 0 && voices[0].name.includes('Female')) || // Fallback
-                      voices.find(voice => voices.length > 0);
-    return femaleVoice;
+function initGSI() {
+  window.onGoogleLibraryLoad = () => {
+    google.accounts.id.initialize({
+      client_id: CLIENT_ID,
+      callback: handleCredentialResponse,
+      auto_select: false,
+    });
+
+    google.accounts.id.renderButton(
+      document.getElementById('g_id_signin'),
+      { theme: 'outline', size: 'large', text: 'signin_with' }
+    );
+  };
 }
 
-// চ্যাটবটে মেসেজ যোগ করার ফাংশন
-function addMessage(text, isUser = false) {
-    const message = document.createElement("p");
-    message.textContent = text;
-    message.classList.add(isUser ? "user-message" : "bot-message");
-    chatBox.appendChild(message);
-    chatBox.scrollTop = chatBox.scrollHeight;
+// load GSI script and call initializer when ready
+(function loadGSI() {
+  const script = document.createElement('script');
+  script.src = 'https://accounts.google.com/gsi/client';
+  script.onload = () => {
+    window.onGoogleLibraryLoad && window.onGoogleLibraryLoad();
+  };
+  document.head.appendChild(script);
+})();
 
-    if (!isUser && text) {
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'bn-BD';
-        const femaleVoice = getBengaliFemaleVoice();
-        if (femaleVoice) {
-            utterance.voice = femaleVoice;
-        } else {
-            console.warn("No Bengali female voice found. Using default voice.");
-        }
-        synth.speak(utterance);
-    }
+async function handleCredentialResponse(response) {
+  // response.credential is a JWT ID token — send to backend to exchange
+  showNote('সাইন-ইন সম্পন্ন হচ্ছে...');
+
+  try {
+    const resp = await fetch(BACKEND_URL + '/auth', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ id_token: response.credential })
+    });
+    const data = await resp.json();
+    if (data.error) throw new Error(data.error);
+
+    // backend returns profile & a session token (backend manages user's access token securely)
+    currentProfile = data.profile;
+    sessionStorage.setItem('sess', data.sessionToken);
+    onSignedIn();
+  } catch (err) {
+    console.error('Auth error', err);
+    alert('লগইন করতে সমস্যা হয়েছে: ' + err.message);
+  }
 }
 
-// OpenRouter থেকে নতুন পাঠ তৈরি করার ফাংশন (অথবা ফলব্যাক)
-async function createNewLesson() {
-    lessonTitle.textContent = "নতুন পাঠ তৈরি হচ্ছে...";
-    lessonContent.innerHTML = "<p>দয়া করে অপেক্ষা করুন...</p>";
-
-    try {
-        const prompt = "আপনি একজন বাংলাভাষী শিক্ষার্থীদের জন্য একজন স্পোকেন ইংলিশ শিক্ষিকা। আপনার লক্ষ্য হলো একজন শিক্ষার্থীকে ধাপে ধাপে ইংরেজি শেখানো। একটি নতুন, সহজ এবং আকর্ষণীয় পাঠ তৈরি করুন। পাঠের মধ্যে একটি ইংরেজি শব্দ বা বাক্য থাকবে, তার বাংলা উচ্চারণ এবং বাংলা অর্থ থাকবে। একটি সংক্ষিপ্ত অনুশীলনও যোগ করুন। পুরো উত্তরটি বাংলায় দিন এবং আপনার উত্তরকে HTML ট্যাগ ব্যবহার করে সুন্দরভাবে সাজান।";
-
-        const response = await fetch(API_URL, {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                model: MODEL_NAME,
-                messages: [
-                    { role: "system", content: "আপনি একজন বাংলা টু ইংরেজি ভার্চুয়াল শিক্ষিকা। আপনি সহজভাবে ইংরেজি শেখান।" },
-                    { role: "user", content: prompt }
-                ]
-            })
-        });
-
-        const data = await response.json();
-        
-        if (data.choices && data.choices[0] && data.choices[0].message) {
-            const lessonResponse = data.choices[0].message.content;
-            lessonTitle.textContent = "নতুন পাঠ";
-            lessonContent.innerHTML = lessonResponse;
-            addMessage("নতুন পাঠ তৈরি হয়েছে। অনুগ্রহ করে অনুশীলন শুরু করুন।", false);
-        } else {
-            // API থেকে ভুল উত্তর এলে ফলব্যাক ব্যবহার
-            throw new Error("API response error");
-        }
-
-    } catch (error) {
-        console.error("API Error or Network issue:", error);
-        
-        // API কল ব্যর্থ হলে ফলব্যাক পাঠ লোড করুন
-        const currentLesson = fallbackLessons[fallbackLessonIndex];
-        lessonTitle.textContent = currentLesson.title;
-        lessonContent.innerHTML = currentLesson.content;
-        addMessage("ইন্টারনেটে সমস্যা হচ্ছে। আপনার জন্য একটি অফলাইন পাঠ লোড করা হয়েছে।", false);
-        
-        // পরের বারের জন্য ফলব্যাক সূচক আপডেট করুন
-        fallbackLessonIndex = (fallbackLessonIndex + 1) % fallbackLessons.length;
-    }
+function onSignedIn() {
+  document.getElementById('auth-section').hidden = true;
+  document.getElementById('lesson-section').hidden = false;
+  document.getElementById('user-name').textContent = currentProfile.name || '';
+  document.getElementById('user-email').textContent = currentProfile.email || '';
+  document.getElementById('user-avatar').src = currentProfile.picture || '';
+  appendBotMessage('স্বাগতম! আপনি এখন আপনার Gemini শিক্ষক ব্যবহার করে ইংরেজি শিখতে পারবেন।');
 }
 
-// ব্যবহারকারীর ইনপুট পাঠানোর ফাংশন (টাইপ করে)
-sendBtn.addEventListener("click", async () => {
-    const userMessage = userInput.value;
-    if (userMessage.trim() === "") return;
+function signOut() {
+  sessionStorage.removeItem('sess');
+  currentProfile = null;
+  document.getElementById('auth-section').hidden = false;
+  document.getElementById('lesson-section').hidden = true;
+  google.accounts.id.disableAutoSelect();
+}
 
-    addMessage(userMessage, true);
-    userInput.value = "";
-    
-    try {
-        const prompt = `আপনি একজন বাংলাভাষী স্পোকেন ইংলিশ শিক্ষিকা। একজন শিক্ষার্থী আপনাকে বলছে: "${userMessage}"। তার উত্তরটি একজন শিক্ষিকার মতো দিন। প্রথমত, তার ভুলগুলো খুঁজে বের করুন এবং সেগুলো সহজ বাংলায় বুঝিয়ে দিন। এরপর সঠিক বাক্যটি দিন এবং তাকে আরও একটি অনুশীলনের জন্য একটি নতুন প্রশ্ন বা বাক্য দিন।`;
-        
-        const response = await fetch(API_URL, {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                model: MODEL_NAME,
-                messages: [
-                    { role: "system", content: "আপনি একজন বাংলা টু ইংরেজি ভার্চুয়াল শিক্ষিকা। আপনি সহজভাবে ইংরেজি শেখান।" },
-                    { role: "user", content: prompt }
-                ]
-            })
-        });
+document.getElementById('signout-btn').addEventListener('click', signOut);
 
-        const data = await response.json();
+const chatEl = document.getElementById('chat');
 
-        if (data.choices && data.choices[0] && data.choices[0].message) {
-            const botResponse = data.choices[0].message.content;
-            addMessage(botResponse, false);
-        } else {
-            addMessage("⚠️ দুঃখিত, কিছু ভুল হয়েছে। আবার চেষ্টা করুন।", false);
-            console.error("OpenRouter API Error:", data);
-        }
+function appendUserMessage(text){
+  const d = document.createElement('div'); d.className='msg user'; d.textContent = text; chatEl.appendChild(d); chatEl.scrollTop = chatEl.scrollHeight;
+}
+function appendBotMessage(text){
+  const d = document.createElement('div'); d.className='msg bot'; d.innerHTML = text; chatEl.appendChild(d); chatEl.scrollTop = chatEl.scrollHeight;
+}
 
-    } catch (error) {
-        console.error("OpenRouter API Error:", error);
-        addMessage("দুঃখিত, কোনো ভুল হয়েছে। আপনার API Key বা ইন্টারনেট সংযোগে সমস্যা হতে পারে।", false);
-    }
+// Chat form handling
+const form = document.getElementById('chat-form');
+form.addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const input = document.getElementById('user-input');
+  const text = input.value.trim(); if(!text) return;
+  appendUserMessage(text);
+  input.value='';
+  appendBotMessage('শিক্ষক উত্তরের জন্য প্রস্তুত হচ্ছে...');
+
+  try{
+    const sessionToken = sessionStorage.getItem('sess');
+    const res = await fetch(BACKEND_URL + '/chat',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ sessionToken, prompt: generateTeachingPrompt(text) })
+    });
+    const j = await res.json();
+    if(j.error) throw new Error(j.error);
+    // replace last placeholder bot message
+    const last = chatEl.querySelector('.msg.bot:last-child');
+    if(last) last.innerHTML = j.reply;
+    else appendBotMessage(j.reply);
+  }catch(err){
+    console.error(err); appendBotMessage('⚠️ শিক্ষক থেকে উত্তর পাওয়া যায়নি — পরে চেষ্টা করুন।');
+  }
 });
 
-
-// স্পিচ টু টেক্সট ফিচার
-const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-recognition.lang = 'en-US'; 
-recognition.interimResults = false;
-recognition.maxAlternatives = 1;
-
-recordBtn.addEventListener('click', () => {
-    const isRecording = recordBtn.classList.contains('recording');
-    if (isRecording) {
-        recognition.stop();
-    } else {
-        recordBtn.classList.add('recording');
-        recordBtn.style.backgroundColor = '#2ecc71'; 
-        addMessage("আপনার কথা শোনা হচ্ছে...", false);
-        recognition.start();
-    }
+// New lesson button — ask backend to create lesson content
+document.getElementById('new-lesson').addEventListener('click', async ()=>{
+  appendBotMessage('নতুন পাঠ তৈরি করা হচ্ছে...');
+  try{
+    const sessionToken = sessionStorage.getItem('sess');
+    const res = await fetch(BACKEND_URL + '/lesson',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionToken})});
+    const j = await res.json();
+    if(j.error) throw new Error(j.error);
+    appendBotMessage(j.lessonHtml);
+  }catch(err){console.error(err); appendBotMessage('পাঠ তৈরি করা যায়নি।');}
 });
 
-recognition.addEventListener('result', async (event) => {
-    const transcript = event.results[0][0].transcript;
-    userInput.value = transcript;
-    sendBtn.click();
+// Course button — get full A→Z course material
+document.getElementById('course-btn').addEventListener('click', async ()=>{
+  appendBotMessage('কোর্স লোড করা হচ্ছে — এটি বড়, কিছুক্ষণ লাগতে পারে...');
+  try{
+    const sessionToken = sessionStorage.getItem('sess');
+    const res = await fetch(BACKEND_URL + '/course',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionToken})});
+    const j = await res.json();
+    if(j.error) throw new Error(j.error);
+    appendBotMessage(j.courseHtml);
+  }catch(err){console.error(err); appendBotMessage('কোর্স লোড করতে ব্যর্থ।');}
 });
 
-recognition.addEventListener('end', () => {
-    recordBtn.classList.remove('recording');
-    recordBtn.style.backgroundColor = '#e74c3c';
-});
+function showNote(msg){console.log(msg)}
 
-recognition.addEventListener('error', (event) => {
-    console.error('Speech recognition error', event);
-    recordBtn.classList.remove('recording');
-    recordBtn.style.backgroundColor = '#e74c3c';
-    addMessage("দুঃখিত, আপনার কথা শুনতে পাইনি। অনুগ্রহ করে আবার চেষ্টা করুন।", false);
-});
+// Teaching prompt maker: gives teacher instructions to correct mistakes and explain in Bangla
+function generateTeachingPrompt(userText){
+  return `You are a Bengali-speaking spoken-English teacher. A student wrote or said: "${userText}". First, identify mistakes and explain them in simple Bangla. Then give the correct English sentence and an extra short exercise (one sentence) for practice. Use friendly tone.`;
+}
 
-// পরবর্তী পাঠে যাওয়ার ফাংশন
-nextLessonBtn.addEventListener("click", () => {
-    createNewLesson();
-});
-
-// প্রথমবার পেজ লোড হলে
-addMessage("শুভ সকাল! আমি আপনার ভার্চুয়াল শিক্ষিকা। ইংরেজি অনুশীলন করতে শুরু করুন।", false);
-createNewLesson();
+// initialize
+initGSI();
