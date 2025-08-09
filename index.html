@@ -1,57 +1,45 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="bn">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
-  <title>তার লাকি নাম্বার — স্পোকেন ইংলিশ শিক্ষক</title>
-  <link rel="stylesheet" href="style.css">
-  <!-- Google Identity Services (for sign-in) -->
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI English Teacher</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <main class="app">
-    <header class="header">
-      <h1>আপনার ভার্চুয়াল শিক্ষক</h1>
-      <p class="subtitle">বাংলা থেকে ইংরেজি — কথা বললে শিক্ষক ঠিক করে দেবে</p>
+    <header>
+        <h1>📚 AI English Teacher</h1>
+        <p>বাংলা থেকে ইংরেজি শেখা – ২৪/৭ ফ্রি</p>
     </header>
 
-    <section class="auth" id="auth-section">
-      <div id="g_id_onload" data-client_id="REPLACE_WITH_CLIENT_ID" data-auto_prompt="false"></div>
-      <div id="g_id_signin"></div>
-      <p class="note">গুগল দিয়ে সাইন ইন করুন — আপনারই Gemini AI শিক্ষক হিসেবে কাজ করবে।</p>
-    </section>
-
-    <section class="lesson" id="lesson-section" hidden>
-      <div class="user-info">
-        <img id="user-avatar" src="" alt="avatar" />
-        <div>
-          <div id="user-name" class="user-name"></div>
-          <div id="user-email" class="user-email"></div>
+    <main>
+        <!-- Google Login Button -->
+        <div id="login-section">
+            <button id="login-btn">Google দিয়ে লগইন করুন</button>
         </div>
-        <button id="signout-btn" class="link">সাইন আউট</button>
-      </div>
 
-      <div class="chat" id="chat">
-        <!-- messages appended here -->
-      </div>
+        <!-- Chat Section -->
+        <div id="chat-section" class="hidden">
+            <div id="chat-box"></div>
 
-      <form id="chat-form" class="chat-form" onsubmit="return false;">
-        <input id="user-input" autocomplete="off" placeholder="বাংলায় বলুন বা লিখুন — শিক্ষক আপনার ভুল ধরিয়ে দেবে" />
-        <button id="send-btn">পাঠান</button>
-      </form>
+            <!-- Hold to Talk Button -->
+            <button id="mic-btn">🎤 Hold to Talk</button>
 
-      <div class="controls">
-        <button id="new-lesson">নতুন পাঠ তৈরি করুন</button>
-        <button id="course-btn">কোর্স সূচনা (A→Z)</button>
-      </div>
+            <!-- Text Input Option -->
+            <div id="text-input">
+                <input type="text" id="user-input" placeholder="Type your question here...">
+                <button id="send-btn">Send</button>
+            </div>
+        </div>
+    </main>
 
-    </section>
-
-    <footer class="footer">
-      <small>এই সেবা জনসাধারণের জন্য বিনামূল্যে।</small>
+    <footer>
+        <p>Made with ❤️ for Students | Free Forever</p>
     </footer>
-  </main>
 
-  <script src="script.js"></script>
+    <script>
+        const CLIENT_ID = "1039650057318-27mqpolij5t5nv655hp2im0n3cbkn8b2.apps.googleusercontent.com";
+    </script>
+    <script src="script.js"></script>
 </body>
 </html>
