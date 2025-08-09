@@ -1,484 +1,57 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="bn">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>সহজ ইংরেজি শিখুন | আপনার ভার্চুয়াল শিক্ষিকা</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Noto+Sans+Bengali:wght@400;500;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Noto Sans Bengali', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f0f2f5;
-            color: #333;
-            display: flex;
-            justify-content: center;
-            min-height: 100vh;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 600px;
-            background-color: #ffffff;
-            padding: 25px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            box-sizing: border-box;
-            border-radius: 12px;
-            margin: 20px;
-        }
-
-        header {
-            text-align: center;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #e0e0e0;
-            margin-bottom: 20px;
-        }
-
-        h1 {
-            font-family: 'Poppins', sans-serif;
-            color: #2c3e50;
-            font-size: 2em;
-            margin: 0;
-            font-weight: 700;
-        }
-
-        p {
-            font-size: 1em;
-            color: #6c757d;
-        }
-
-        h2 {
-            font-family: 'Poppins', sans-serif;
-            color: #34495e;
-            border-bottom: 1px solid #ddd;
-            padding-bottom: 10px;
-            margin-top: 30px;
-            font-weight: 600;
-        }
-
-        #lesson-content {
-            background-color: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-
-        #lesson-content h3 {
-            font-family: 'Poppins', sans-serif;
-            color: #007bff;
-        }
-
-        #lesson-content ul {
-            list-style-type: none;
-            padding: 0;
-        }
-
-        #lesson-content li {
-            background-color: #e9ecef;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 8px;
-        }
-
-        #next-lesson-btn {
-            width: 100%;
-            padding: 12px;
-            font-size: 16px;
-            font-weight: bold;
-            color: #fff;
-            background-color: #007bff;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            font-family: 'Noto Sans Bengali', sans-serif;
-        }
-
-        #next-lesson-btn:hover {
-            background-color: #0056b3;
-        }
-
-        #next-lesson-btn:active {
-            background-color: #004494;
-        }
-
-        #chat-box {
-            border: 1px solid #ddd;
-            padding: 15px;
-            height: 350px;
-            overflow-y: auto;
-            margin-bottom: 15px;
-            border-radius: 8px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .bot-message, .user-message {
-            padding: 12px;
-            margin-bottom: 10px;
-            border-radius: 10px;
-            max-width: 80%;
-            word-wrap: break-word;
-            animation: fadeIn 0.5s ease;
-        }
-
-        .bot-message {
-            background-color: #e9f5ff;
-            text-align: left;
-            align-self: flex-start;
-            border-top-left-radius: 0;
-        }
-
-        .user-message {
-            background-color: #d4edda;
-            text-align: right;
-            align-self: flex-end;
-            border-top-right-radius: 0;
-        }
-
-        .input-container {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        #user-input {
-            flex-grow: 1;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-            font-family: 'Noto Sans Bengali', sans-serif;
-        }
-
-        #send-btn, #record-btn {
-            background-color: #28a745;
-            color: #fff;
-            border: none;
-            padding: 12px 18px;
-            font-size: 16px;
-            cursor: pointer;
-            border-radius: 8px;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            font-family: 'Noto Sans Bengali', sans-serif;
-        }
-
-        #send-btn {
-            background-color: #007bff;
-        }
-
-        #record-btn {
-            padding: 12px;
-        }
-
-        #record-btn svg {
-            vertical-align: middle;
-        }
-
-        #send-btn:disabled, #record-btn:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
-        }
-
-        .recording {
-            background-color: #e74c3c !important;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
+  <title>তার লাকি নাম্বার — স্পোকেন ইংলিশ শিক্ষক</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Google Identity Services (for sign-in) -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>সহজ ইংরেজি শিখুন</h1>
-            <p>আপনার স্পোকেন ইংলিশ শেখার যাত্রা শুরু করুন।</p>
-        </header>
+  <main class="app">
+    <header class="header">
+      <h1>আপনার ভার্চুয়াল শিক্ষক</h1>
+      <p class="subtitle">বাংলা থেকে ইংরেজি — কথা বললে শিক্ষক ঠিক করে দেবে</p>
+    </header>
 
-        <section id="lesson-section">
-            <h2 id="lesson-title">নতুন পাঠ</h2>
-            <div id="lesson-content">
-                </div>
-            <button id="next-lesson-btn">পরবর্তী পাঠ</button>
-        </section>
+    <section class="auth" id="auth-section">
+      <div id="g_id_onload" data-client_id="REPLACE_WITH_CLIENT_ID" data-auto_prompt="false"></div>
+      <div id="g_id_signin"></div>
+      <p class="note">গুগল দিয়ে সাইন ইন করুন — আপনারই Gemini AI শিক্ষক হিসেবে কাজ করবে।</p>
+    </section>
 
-        <section id="chat-section">
-            <h2>ভার্চুয়াল শিক্ষিকা</h2>
-            <div id="chat-box">
-                </div>
-            <div class="input-container">
-                <input type="text" id="user-input" placeholder="এখানে আপনার উত্তর লিখুন..." autofocus>
-                <button id="record-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-mic">
-                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
-                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-                        <line x1="12" y1="19" x2="12" y2="23"></line>
-                        <line x1="8" y1="23" x2="16" y2="23"></line>
-                    </svg>
-                </button>
-                <button id="send-btn">পাঠান</button>
-            </div>
-        </section>
-    </div>
-    
-    <script>
-        // OpenRouter API Key এখানে পেস্ট করা হয়েছে
-        const OPENROUTER_API_KEY = "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";
-        const API_URL = "https://openrouter.ai/api/v1/chat/completions";
+    <section class="lesson" id="lesson-section" hidden>
+      <div class="user-info">
+        <img id="user-avatar" src="" alt="avatar" />
+        <div>
+          <div id="user-name" class="user-name"></div>
+          <div id="user-email" class="user-email"></div>
+        </div>
+        <button id="signout-btn" class="link">সাইন আউট</button>
+      </div>
 
-        // এখানে মডেলগুলোর একটি তালিকা দেওয়া হলো। যদি প্রথমটি কাজ না করে, এটি পরেরটি ব্যবহার করবে।
-        const MODEL_LIST = [
-            "mistralai/mixtral-8x7b-instruct",
-            "google/gemma-7b-it",
-            "meta-llama/llama-2-70b-chat"
-        ];
-        
-        // যদি API কাজ না করে, তাহলে ব্যবহারের জন্য কিছু আগে থেকে তৈরি করা পাঠ।
-        const fallbackLessons = [
-            {
-                title: "পাঠ ১: গ্রিটিংস (Greetings)",
-                content: `<h3>আজকের শব্দ: Hello!</h3>
-                <p><b>Hello</b> (হ্যালো)লো)<br>
-                <b>বাংলা অর্থ:</b> অভিবাদন! / ওহে! / কেমন আছেন? (সাধারণ অর্থ)</p>
-                <p><b>ব্যবহার:</b> যখন আপনি কারো সাথে প্রথম দেখা করেন বা কারো মনোযোগ আকর্ষণ করতে চান, তখন আপনি "Hello!" বলতে পারেন।</p>
-                <p><b>উদাহরণ:</b><br>
-                • Hello, how are you?<br>
-                • Hello, is anyone there?</p>
-                <h3>আজকের বাক্য: What is your name?</h3>
-                <p><b>What is your name?</b> (হোয়াট ইজ ইওর নেইম?)<br>
-                <b>বাংলা অর্থ:</b> আপনার নাম কী?</p>
-                <p><b>ব্যবহার:</b> কারো নাম জানতে আপনি এই বাক্যটি ব্যবহার করতে পারেন।</p>
-                <p><b>উদাহরণ:</b><br>
-                • Hello, what is your name?<br>
-                • If someone asks you "What is your name?", you can answer "My name is [আপনার নাম]"</p>
-                `
-            },
-            {
-                title: "পাঠ ২: নিজেকে পরিচয় করানো (Introducing yourself)",
-                content: `<h3>আজকের শব্দ: My name is...</h3>
-                <p><b>My name is...</b> (মাই নেইম ইজ...)<br>
-                <b>বাংলা অর্থ:</b> আমার নাম হয়...</p>
-                <p><b>ব্যবহার:</b> আপনি যখন আপনার নাম বলবেন, তখন এই বাক্যটি ব্যবহার করবেন।</p>
-                <p><b>উদাহরণ:</b><br>
-                • My name is Rima.<br>
-                • My name is Rohan.</p>
-                <h3>আজকের বাক্য: Where are you from?</h3>
-                <p><b>Where are you from?</b> (হোয়্যার আর ইউ ফ্রম?)<br>
-                <b>বাংলা অর্থ:</b> আপনি কোথা থেকে এসেছেন?</p>
-                <p><b>ব্যবহার:</b> কারো দেশ বা শহর জানতে এই বাক্যটি ব্যবহার করুন।</p>
-                <p><b>উদাহরণ:</b><br>
-                • Where are you from? I am from Bangladesh.</p>
-                `
-            },
-            {
-                title: "পাঠ ৩: প্রশ্ন করা (Asking Questions)",
-                content: `<h3>আজকের শব্দ: How are you?</h3>
-                <p><b>How are you?</b> (হাউ আর ইউ?)<br>
-                <b>বাংলা অর্থ:</b> আপনি কেমন আছেন?</p>
-                <p><b>ব্যবহার:</b> কারো খোঁজ-খবর নিতে এই বাক্যটি ব্যবহার করতে পারেন।</p>
-                <p><b>উদাহরণ:</b><br>
-                • Hello, how are you?<br>
-                • I am fine, thank you. How are you?</p>
-                <h3>আজকের বাক্য: What do you do?</h3>
-                <p><b>What do you do?</b> (হোয়াট ডু ইউ ডু?)<br>
-                <b>বাংলা অর্থ:</b> আপনি কী করেন?</p>
-                <p><b>ব্যবহার:</b> কারো পেশা বা কাজ সম্পর্কে জানতে এই বাক্যটি ব্যবহার করুন।</p>
-                <p><b>উদাহরণ:</b><br>
-                • What do you do? I am a student.</p>
-                `
-            }
-        ];
+      <div class="chat" id="chat">
+        <!-- messages appended here -->
+      </div>
 
-        let fallbackLessonIndex = 0; // ফলব্যাক পাঠের জন্য সূচক
+      <form id="chat-form" class="chat-form" onsubmit="return false;">
+        <input id="user-input" autocomplete="off" placeholder="বাংলায় বলুন বা লিখুন — শিক্ষক আপনার ভুল ধরিয়ে দেবে" />
+        <button id="send-btn">পাঠান</button>
+      </form>
 
-        // HTML উপাদানগুলো নির্বাচন করা
-        const lessonTitle = document.getElementById("lesson-title");
-        const lessonContent = document.getElementById("lesson-content");
-        const nextLessonBtn = document.getElementById("next-lesson-btn");
-        const chatBox = document.getElementById("chat-box");
-        const userInput = document.getElementById("user-input");
-        const sendBtn = document.getElementById("send-btn");
-        const recordBtn = document.getElementById("record-btn");
+      <div class="controls">
+        <button id="new-lesson">নতুন পাঠ তৈরি করুন</button>
+        <button id="course-btn">কোর্স সূচনা (A→Z)</button>
+      </div>
 
-        // স্পিচ সিন্থেসিস (Text-to-Speech)
-        const synth = window.speechSynthesis;
+    </section>
 
-        // ফিমেল বাংলা ভয়েস খুঁজে বের করার ফাংশন
-        function getBengaliFemaleVoice() {
-            const voices = synth.getVoices();
-            const femaleVoice = voices.find(voice => voice.lang === 'bn-BD' && voice.name.includes('Female')) ||
-                              voices.find(voice => voice.lang.startsWith('bn') && voice.name.includes('Female')) ||
-                              voices.find(voice => voices.length > 0 && voices[0].name.includes('Female')) || 
-                              voices.find(voice => voices.length > 0);
-            return femaleVoice;
-        }
+    <footer class="footer">
+      <small>এই সেবা জনসাধারণের জন্য বিনামূল্যে।</small>
+    </footer>
+  </main>
 
-        // চ্যাটবটে মেসেজ যোগ করার ফাংশন
-        function addMessage(text, isUser = false) {
-            const message = document.createElement("p");
-            message.textContent = text;
-            message.classList.add(isUser ? "user-message" : "bot-message");
-            chatBox.appendChild(message);
-            chatBox.scrollTop = chatBox.scrollHeight;
-
-            if (!isUser && text) {
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'bn-BD';
-                const femaleVoice = getBengaliFemaleVoice();
-                if (femaleVoice) {
-                    utterance.voice = femaleVoice;
-                } else {
-                    console.warn("No Bengali female voice found. Using default voice.");
-                }
-                synth.speak(utterance);
-            }
-        }
-
-        // OpenRouter থেকে নতুন পাঠ তৈরি করার ফাংশন (অথবা ফলব্যাক)
-        async function createNewLesson() {
-            lessonTitle.textContent = "নতুন পাঠ তৈরি হচ্ছে...";
-            lessonContent.innerHTML = "<p>দয়া করে অপেক্ষা করুন...</p>";
-
-            for (const model of MODEL_LIST) {
-                try {
-                    const prompt = "আপনি একজন বাংলাভাষী শিক্ষার্থীদের জন্য একজন স্পোকেন ইংলিশ শিক্ষিকা। আপনার লক্ষ্য হলো একজন শিক্ষার্থীকে ধাপে ধাপে ইংরেজি শেখানো। একটি নতুন, সহজ এবং আকর্ষণীয় পাঠ তৈরি করুন। পাঠের মধ্যে একটি ইংরেজি শব্দ বা বাক্য থাকবে, তার বাংলা উচ্চারণ এবং বাংলা অর্থ থাকবে। একটি সংক্ষিপ্ত অনুশীলনও যোগ করুন। পুরো উত্তরটি বাংলায় দিন এবং আপনার উত্তরকে HTML ট্যাগ ব্যবহার করে সুন্দরভাবে সাজান।";
-
-                    const response = await fetch(API_URL, {
-                        method: "POST",
-                        headers: {
-                            "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify({
-                            model: model,
-                            messages: [
-                                { role: "system", content: "আপনি একজন বাংলা টু ইংরেজি ভার্চুয়াল শিক্ষিকা। আপনি সহজভাবে ইংরেজি শেখান।" },
-                                { role: "user", content: prompt }
-                            ]
-                        })
-                    });
-
-                    const data = await response.json();
-                    
-                    if (data.choices && data.choices[0] && data.choices[0].message) {
-                        const lessonResponse = data.choices[0].message.content;
-                        lessonTitle.textContent = "নতুন পাঠ";
-                        lessonContent.innerHTML = lessonResponse;
-                        addMessage("নতুন পাঠ তৈরি হয়েছে। অনুগ্রহ করে অনুশীলন শুরু করুন।", false);
-                        return; // সফল হলে লুপ থেকে বেরিয়ে যাবে
-                    }
-                } catch (error) {
-                    console.error(`API Error with model ${model}:`, error);
-                }
-            }
-            
-            // যদি কোনো মডেলই কাজ না করে
-            const currentLesson = fallbackLessons[fallbackLessonIndex];
-            lessonTitle.textContent = currentLesson.title;
-            lessonContent.innerHTML = currentLesson.content;
-            addMessage("ইন্টারনেট বা এপিআই-এর সমস্যা। আপাতত অফলাইন পাঠ লোড হচ্ছে।", false);
-            fallbackLessonIndex = (fallbackLessonIndex + 1) % fallbackLessons.length;
-        }
-
-        // ব্যবহারকারীর ইনপুট পাঠানোর ফাংশন (টাইপ করে)
-        sendBtn.addEventListener("click", async () => {
-            const userMessage = userInput.value;
-            if (userMessage.trim() === "") return;
-
-            addMessage(userMessage, true);
-            userInput.value = "";
-            
-            for (const model of MODEL_LIST) {
-                try {
-                    const prompt = `আপনি একজন বাংলাভাষী স্পোকেন ইংলিশ শিক্ষিকা। একজন শিক্ষার্থী আপনাকে বলছে: "${userMessage}"। তার উত্তরটি একজন শিক্ষিকার মতো দিন। প্রথমত, তার ভুলগুলো খুঁজে বের করুন এবং সেগুলো সহজ বাংলায় বুঝিয়ে দিন। এরপর সঠিক বাক্যটি দিন এবং তাকে আরও একটি অনুশীলনের জন্য একটি নতুন প্রশ্ন বা বাক্য দিন।`;
-                    
-                    const response = await fetch(API_URL, {
-                        method: "POST",
-                        headers: {
-                            "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify({
-                            model: model,
-                            messages: [
-                                { role: "system", content: "আপনি একজন বাংলা টু ইংরেজি ভার্চুয়াল শিক্ষিকা। আপনি সহজভাবে ইংরেজি শেখান।" },
-                                { role: "user", content: prompt }
-                            ]
-                        })
-                    });
-
-                    const data = await response.json();
-
-                    if (data.choices && data.choices[0] && data.choices[0].message) {
-                        const botResponse = data.choices[0].message.content;
-                        addMessage(botResponse, false);
-                        return; // সফল হলে লুপ থেকে বেরিয়ে যাবে
-                    }
-                } catch (error) {
-                    console.error(`OpenRouter API Error with model ${model}:`, error);
-                }
-            }
-
-            // যদি কোনো মডেলই কাজ না করে
-            addMessage("দুঃখিত, এখন শিক্ষিকা ব্যস্ত আছেন। আপনি একটি নতুন পাঠ অনুশীলন করতে পারেন।", false);
-        });
-
-
-        // স্পিচ টু টেক্সট ফিচার
-        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-        recognition.lang = 'en-US'; 
-        recognition.interimResults = false;
-        recognition.maxAlternatives = 1;
-
-        recordBtn.addEventListener('click', () => {
-            const isRecording = recordBtn.classList.contains('recording');
-            if (isRecording) {
-                recognition.stop();
-            } else {
-                recordBtn.classList.add('recording');
-                recordBtn.style.backgroundColor = '#2ecc71'; 
-                addMessage("আপনার কথা শোনা হচ্ছে...", false);
-                recognition.start();
-            }
-        });
-
-        recognition.addEventListener('result', async (event) => {
-            const transcript = event.results[0][0].transcript;
-            userInput.value = transcript;
-            sendBtn.click();
-        });
-
-        recognition.addEventListener('end', () => {
-            recordBtn.classList.remove('recording');
-            recordBtn.style.backgroundColor = '#e74c3c';
-        });
-
-        recognition.addEventListener('error', (event) => {
-            console.error('Speech recognition error', event);
-            recordBtn.classList.remove('recording');
-            recordBtn.style.backgroundColor = '#e74c3c';
-            addMessage("দুঃখিত, আপনার কথা শুনতে পাইনি। অনুগ্রহ করে আবার চেষ্টা করুন।", false);
-        });
-
-        // পরবর্তী পাঠে যাওয়ার ফাংশন
-        nextLessonBtn.addEventListener("click", () => {
-            createNewLesson();
-        });
-
-        // প্রথমবার পেজ লোড হলে
-        addMessage("শুভ সকাল! আমি আপনার ভার্চুয়াল শিক্ষিকা। ইংরেজি অনুশীলন করতে শুরু করুন।", false);
-        createNewLesson();
-    </script>
+  <script src="script.js"></script>
 </body>
 </html>
