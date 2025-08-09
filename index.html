@@ -233,10 +233,16 @@
     </div>
     
     <script>
-        // OpenRouter API Key এখানে পেস্ট করা হয়েছে (English teacher key)
+        // OpenRouter API Key এখানে পেস্ট করা হয়েছে
         const OPENROUTER_API_KEY = "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";
         const API_URL = "https://openrouter.ai/api/v1/chat/completions";
-        const MODEL_NAME = "mistralai/mistral-7b-instruct";
+
+        // এখানে মডেলগুলোর একটি তালিকা দেওয়া হলো। যদি প্রথমটি কাজ না করে, এটি পরেরটি ব্যবহার করবে।
+        const MODEL_LIST = [
+            "mistralai/mixtral-8x7b-instruct",
+            "google/gemma-7b-it",
+            "meta-llama/llama-2-70b-chat"
+        ];
         
         // যদি API কাজ না করে, তাহলে ব্যবহারের জন্য কিছু আগে থেকে তৈরি করা পাঠ।
         const fallbackLessons = [
@@ -344,48 +350,45 @@
             lessonTitle.textContent = "নতুন পাঠ তৈরি হচ্ছে...";
             lessonContent.innerHTML = "<p>দয়া করে অপেক্ষা করুন...</p>";
 
-            try {
-                const prompt = "আপনি একজন বাংলাভাষী শিক্ষার্থীদের জন্য একজন স্পোকেন ইংলিশ শিক্ষিকা। আপনার লক্ষ্য হলো একজন শিক্ষার্থীকে ধাপে ধাপে ইংরেজি শেখানো। একটি নতুন, সহজ এবং আকর্ষণীয় পাঠ তৈরি করুন। পাঠের মধ্যে একটি ইংরেজি শব্দ বা বাক্য থাকবে, তার বাংলা উচ্চারণ এবং বাংলা অর্থ থাকবে। একটি সংক্ষিপ্ত অনুশীলনও যোগ করুন। পুরো উত্তরটি বাংলায় দিন এবং আপনার উত্তরকে HTML ট্যাগ ব্যবহার করে সুন্দরভাবে সাজান।";
+            for (const model of MODEL_LIST) {
+                try {
+                    const prompt = "আপনি একজন বাংলাভাষী শিক্ষার্থীদের জন্য একজন স্পোকেন ইংলিশ শিক্ষিকা। আপনার লক্ষ্য হলো একজন শিক্ষার্থীকে ধাপে ধাপে ইংরেজি শেখানো। একটি নতুন, সহজ এবং আকর্ষণীয় পাঠ তৈরি করুন। পাঠের মধ্যে একটি ইংরেজি শব্দ বা বাক্য থাকবে, তার বাংলা উচ্চারণ এবং বাংলা অর্থ থাকবে। একটি সংক্ষিপ্ত অনুশীলনও যোগ করুন। পুরো উত্তরটি বাংলায় দিন এবং আপনার উত্তরকে HTML ট্যাগ ব্যবহার করে সুন্দরভাবে সাজান।";
 
-                const response = await fetch(API_URL, {
-                    method: "POST",
-                    headers: {
-                        "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        model: MODEL_NAME,
-                        messages: [
-                            { role: "system", content: "আপনি একজন বাংলা টু ইংরেজি ভার্চুয়াল শিক্ষিকা। আপনি সহজভাবে ইংরেজি শেখান।" },
-                            { role: "user", content: prompt }
-                        ]
-                    })
-                });
+                    const response = await fetch(API_URL, {
+                        method: "POST",
+                        headers: {
+                            "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            model: model,
+                            messages: [
+                                { role: "system", content: "আপনি একজন বাংলা টু ইংরেজি ভার্চুয়াল শিক্ষিকা। আপনি সহজভাবে ইংরেজি শেখান।" },
+                                { role: "user", content: prompt }
+                            ]
+                        })
+                    });
 
-                const data = await response.json();
-                
-                if (data.choices && data.choices[0] && data.choices[0].message) {
-                    const lessonResponse = data.choices[0].message.content;
-                    lessonTitle.textContent = "নতুন পাঠ";
-                    lessonContent.innerHTML = lessonResponse;
-                    addMessage("নতুন পাঠ তৈরি হয়েছে। অনুগ্রহ করে অনুশীলন শুরু করুন।", false);
-                } else {
-                    // API থেকে ভুল উত্তর এলে ফলব্যাক ব্যবহার
-                    throw new Error("API response error");
+                    const data = await response.json();
+                    
+                    if (data.choices && data.choices[0] && data.choices[0].message) {
+                        const lessonResponse = data.choices[0].message.content;
+                        lessonTitle.textContent = "নতুন পাঠ";
+                        lessonContent.innerHTML = lessonResponse;
+                        addMessage("নতুন পাঠ তৈরি হয়েছে। অনুগ্রহ করে অনুশীলন শুরু করুন।", false);
+                        return; // সফল হলে লুপ থেকে বেরিয়ে যাবে
+                    }
+                } catch (error) {
+                    console.error(`API Error with model ${model}:`, error);
                 }
-
-            } catch (error) {
-                console.error("API Error or Network issue:", error);
-                
-                // API কল ব্যর্থ হলে ফলব্যাক পাঠ লোড করুন
-                const currentLesson = fallbackLessons[fallbackLessonIndex];
-                lessonTitle.textContent = currentLesson.title;
-                lessonContent.innerHTML = currentLesson.content;
-                addMessage("ইন্টারনেটে সমস্যা হচ্ছে। আপনার জন্য একটি অফলাইন পাঠ লোড করা হয়েছে।", false);
-                
-                // পরের বারের জন্য ফলব্যাক সূচক আপডেট করুন
-                fallbackLessonIndex = (fallbackLessonIndex + 1) % fallbackLessons.length;
             }
+            
+            // যদি কোনো মডেলই কাজ না করে
+            const currentLesson = fallbackLessons[fallbackLessonIndex];
+            lessonTitle.textContent = currentLesson.title;
+            lessonContent.innerHTML = currentLesson.content;
+            addMessage("ইন্টারনেট বা এপিআই-এর সমস্যা। আপাতত অফলাইন পাঠ লোড হচ্ছে।", false);
+            fallbackLessonIndex = (fallbackLessonIndex + 1) % fallbackLessons.length;
         }
 
         // ব্যবহারকারীর ইনপুট পাঠানোর ফাংশন (টাইপ করে)
@@ -396,38 +399,39 @@
             addMessage(userMessage, true);
             userInput.value = "";
             
-            try {
-                const prompt = `আপনি একজন বাংলাভাষী স্পোকেন ইংলিশ শিক্ষিকা। একজন শিক্ষার্থী আপনাকে বলছে: "${userMessage}"। তার উত্তরটি একজন শিক্ষিকার মতো দিন। প্রথমত, তার ভুলগুলো খুঁজে বের করুন এবং সেগুলো সহজ বাংলায় বুঝিয়ে দিন। এরপর সঠিক বাক্যটি দিন এবং তাকে আরও একটি অনুশীলনের জন্য একটি নতুন প্রশ্ন বা বাক্য দিন।`;
-                
-                const response = await fetch(API_URL, {
-                    method: "POST",
-                    headers: {
-                        "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        model: MODEL_NAME,
-                        messages: [
-                            { role: "system", content: "আপনি একজন বাংলা টু ইংরেজি ভার্চুয়াল শিক্ষিকা। আপনি সহজভাবে ইংরেজি শেখান।" },
-                            { role: "user", content: prompt }
-                        ]
-                    })
-                });
+            for (const model of MODEL_LIST) {
+                try {
+                    const prompt = `আপনি একজন বাংলাভাষী স্পোকেন ইংলিশ শিক্ষিকা। একজন শিক্ষার্থী আপনাকে বলছে: "${userMessage}"। তার উত্তরটি একজন শিক্ষিকার মতো দিন। প্রথমত, তার ভুলগুলো খুঁজে বের করুন এবং সেগুলো সহজ বাংলায় বুঝিয়ে দিন। এরপর সঠিক বাক্যটি দিন এবং তাকে আরও একটি অনুশীলনের জন্য একটি নতুন প্রশ্ন বা বাক্য দিন।`;
+                    
+                    const response = await fetch(API_URL, {
+                        method: "POST",
+                        headers: {
+                            "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            model: model,
+                            messages: [
+                                { role: "system", content: "আপনি একজন বাংলা টু ইংরেজি ভার্চুয়াল শিক্ষিকা। আপনি সহজভাবে ইংরেজি শেখান।" },
+                                { role: "user", content: prompt }
+                            ]
+                        })
+                    });
 
-                const data = await response.json();
+                    const data = await response.json();
 
-                if (data.choices && data.choices[0] && data.choices[0].message) {
-                    const botResponse = data.choices[0].message.content;
-                    addMessage(botResponse, false);
-                } else {
-                    addMessage("⚠️ দুঃখিত, কিছু ভুল হয়েছে। আবার চেষ্টা করুন।", false);
-                    console.error("OpenRouter API Error:", data);
+                    if (data.choices && data.choices[0] && data.choices[0].message) {
+                        const botResponse = data.choices[0].message.content;
+                        addMessage(botResponse, false);
+                        return; // সফল হলে লুপ থেকে বেরিয়ে যাবে
+                    }
+                } catch (error) {
+                    console.error(`OpenRouter API Error with model ${model}:`, error);
                 }
-
-            } catch (error) {
-                console.error("OpenRouter API Error:", error);
-                addMessage("দুঃখিত, কোনো ভুল হয়েছে। আপনার API Key বা ইন্টারনেট সংযোগে সমস্যা হতে পারে।", false);
             }
+
+            // যদি কোনো মডেলই কাজ না করে
+            addMessage("দুঃখিত, এখন শিক্ষিকা ব্যস্ত আছেন। আপনি একটি নতুন পাঠ অনুশীলন করতে পারেন।", false);
         });
 
 
