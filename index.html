@@ -11,34 +11,44 @@
     <div class="container">
         <h1>ডেটা এন্ট্রি সিস্টেম</h1>
 
-        <div class="section">
-            <h2>নতুন নাম রেজিস্টার করুন</h2>
-            <input type="text" id="newNameInput" placeholder="নাম লিখুন">
-            <button onclick="addName()">যোগ করুন</button>
+        <div class="section" id="loginSection">
+            <h2>লগইন</h2>
+            <input type="text" id="usernameInput" placeholder="ইউজারনেম">
+            <input type="password" id="passwordInput" placeholder="পাসওয়ার্ড">
+            <button onclick="login()">লগইন করুন</button>
         </div>
 
-        <div class="section">
-            <h2>ডেটা এন্ট্রি</h2>
-            <select id="nameSelect" onchange="showEntryBoxes()">
-                <option value="">একটি নাম নির্বাচন করুন</option>
-            </select>
+        <div id="mainContent" style="display:none;">
             
-            <div id="entryBoxes" style="display: none;">
-                <p>নাম্বার এবং অ্যামাউন্ট দিন:</p>
-                <div id="numberInputs">
+            <div class="section">
+                <h2>নতুন নাম রেজিস্টার করুন</h2>
+                <input type="text" id="newNameInput" placeholder="নাম লিখুন">
+                <button onclick="addName()">যোগ করুন</button>
+            </div>
+
+            <div class="section">
+                <h2>ডেটা এন্ট্রি</h2>
+                <select id="nameSelect" onchange="showEntryBoxes()">
+                    <option value="">একটি নাম নির্বাচন করুন</option>
+                </select>
+                
+                <div id="entryBoxes" style="display: none;">
+                    <p>নাম্বার এবং অ্যামাউন্ট দিন:</p>
+                    <div id="numberInputs">
+                        </div>
+                    <div class="total-amount">
+                        <strong>মোট টাকা:</strong> <span id="totalAmountDisplay">0</span>
                     </div>
-                <div class="total-amount">
-                    <strong>মোট টাকা:</strong> <span id="totalAmountDisplay">0</span>
+                    <button onclick="saveData()">ডেটা সেভ করুন</button>
                 </div>
             </div>
-            
-            <button onclick="saveData()">ডেটা সেভ করুন</button>
-        </div>
 
-        <div class="section">
-            <h2>রিপোর্ট</h2>
-            <div id="reportContainer">
-                </div>
+            <div class="section">
+                <h2>রিপোর্ট</h2>
+                <div id="reportContainer">
+                    </div>
+            </div>
+
         </div>
 
     </div>
