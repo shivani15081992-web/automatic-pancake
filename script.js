@@ -1,79 +1,85 @@
-// আপনার Google Client ID এখানে দিন
-const CLIENT_ID = "1039650057318-27mqpolij5t5nv655hp2im0n3cbkn8b2.apps.googleusercontent.com";
+let registeredNames = [];
+let nameData = {};
 
-let token = null;
+document.addEventListener('DOMContentLoaded', () => {
+    // 0 থেকে 9 পর্যন্ত ইনপুট বক্স তৈরি করা
+    const numberInputsDiv = document.getElementById('numberInputs');
+    for (let i = 0; i <= 9; i++) {
+        const inputGroup = document.createElement('div');
+        inputGroup.className = 'number-input-group';
+        inputGroup.innerHTML = `
+            <label>${i}:</label>
+            <input type="number" id="input-${i}" value="0" min="0">
+        `;
+        numberInputsDiv.appendChild(inputGroup);
+    }
+});
 
-// Google OAuth Login
-function handleCredentialResponse(response) {
-    console.log("ID Token: " + response.credential);
-    document.getElementById("login-section").classList.add("hidden");
-    document.getElementById("chat-section").classList.remove("hidden");
-    token = response.credential;
+function addName() {
+    const newNameInput = document.getElementById('newNameInput');
+    const newName = newNameInput.value.trim();
+
+    if (newName && !registeredNames.includes(newName)) {
+        registeredNames.push(newName);
+        nameData[newName] = {}; // নতুন নামের জন্য ডেটা অবজেক্ট তৈরি
+        updateNameSelect();
+        newNameInput.value = '';
+        alert(`${newName} সফলভাবে রেজিস্টার হয়েছে!`);
+    } else {
+        alert('দয়া করে একটি বৈধ নাম লিখুন।');
+    }
 }
 
-// Google Sign-In ইনি‌শিয়ালাইজ
-window.onload = function () {
-    google.accounts.id.initialize({
-        client_id: CLIENT_ID,
-        callback: handleCredentialResponse
+function updateNameSelect() {
+    const nameSelect = document.getElementById('nameSelect');
+    nameSelect.innerHTML = '<option value="">একটি নাম নির্বাচন করুন</option>';
+    registeredNames.forEach(name => {
+        const option = document.createElement('option');
+        option.value = name;
+        option.textContent = name;
+        nameSelect.appendChild(option);
     });
-    google.accounts.id.renderButton(
-        document.getElementById("login-btn"),
-        { theme: "outline", size: "large" }
-    );
-};
-
-// চ্যাট বক্সে মেসেজ যোগ করা
-function addMessage(text, sender) {
-    const chatBox = document.getElementById("chat-box");
-    const message = document.createElement("div");
-    message.classList.add("message", sender);
-    message.innerText = text;
-    chatBox.appendChild(message);
-    chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-// AI রেসপন্স (ডেমো জন্য)
-async function getAIResponse(userText) {
-    // এখানে আসল AI API কল করবেন (Gemini বা অন্য)
-    let correction = userText; // এখানে ভুল ঠিক করা হবে
-    return `আপনি বলেছিলেন: "${userText}"\nসঠিকভাবে হবে: "${correction}"`;
+function showEntryBoxes() {
+    const selectedName = document.getElementById('nameSelect').value;
+    const entryBoxes = document.getElementById('entryBoxes');
+    
+    if (selectedName) {
+        entryBoxes.style.display = 'block';
+        loadDataForName(selectedName);
+    } else {
+        entryBoxes.style.display = 'none';
+    }
 }
 
-// Send বাটন ক্লিক
-document.getElementById("send-btn").addEventListener("click", async () => {
-    const userInput = document.getElementById("user-input").value.trim();
-    if (!userInput) return;
-    addMessage(userInput, "user");
-    document.getElementById("user-input").value = "";
-
-    const aiResponse = await getAIResponse(userInput);
-    addMessage(aiResponse, "bot");
-});
-
-// Hold-to-Talk (Speech Recognition)
-let recognition;
-if ('webkitSpeechRecognition' in window) {
-    recognition = new webkitSpeechRecognition();
-    recognition.lang = "bn-BD"; // বাংলা
-    recognition.continuous = false;
-    recognition.interimResults = false;
-
-    recognition.onresult = async function (event) {
-        const transcript = event.results[0][0].transcript;
-        addMessage(transcript, "user");
-        const aiResponse = await getAIResponse(transcript);
-        addMessage(aiResponse, "bot");
-    };
-} else {
-    alert("Speech Recognition আপনার ব্রাউজারে সাপোর্ট করে না।");
+function loadDataForName(name) {
+    let totalAmount = 0;
+    for (let i = 0; i <= 9; i++) {
+        const inputField = document.getElementById(`input-${i}`);
+        // এখানে ডেটা লোড করার লজিক লিখতে হবে (যদি ডেটাবেজ থাকত)
+        // আপাতত, প্রতিটি ইনপুট বক্স ০ দিয়ে শুরু হবে
+        inputField.value = 0;
+    }
+    document.getElementById('totalAmountDisplay').textContent = totalAmount;
 }
 
-// Mic বাটন প্রেস ও রিলিজ
-const micBtn = document.getElementById("mic-btn");
-micBtn.addEventListener("mousedown", () => {
-    recognition.start();
-});
-micBtn.addEventListener("mouseup", () => {
-    recognition.stop();
-});
+function saveData() {
+    const selectedName = document.getElementById('nameSelect').value;
+    if (!selectedName) {
+        alert('দয়া করে একটি নাম নির্বাচন করুন।');
+        return;
+    }
+
+    let currentTotal = 0;
+    for (let i = 0; i <= 9; i++) {
+        const amount = parseInt(document.getElementById(`input-${i}`).value) || 0;
+        // এখানে ডেটা সেভ করার লজিক লিখতে হবে
+        // বর্তমানে, এটি শুধুমাত্র টোটাল হিসাব করবে।
+        currentTotal += amount;
+    }
+
+    document.getElementById('totalAmountDisplay').textContent = currentTotal;
+    alert(`ডেটা সেভ করা হয়েছে! মোট টাকা: ${currentTotal}`);
+    // এখানে রিপোর্ট আপডেট করার লজিক লিখতে হবে।
+}
