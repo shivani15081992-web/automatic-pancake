@@ -3,42 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Spoken English Teacher</title>
+    <title>ডেটা এন্ট্রি সিস্টেম</title>
     <link rel="stylesheet" href="style.css">
-
-    <!-- Google OAuth Script -->
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
 
-    <!-- Login Section -->
-    <section id="login-section">
-        <h2>AI ইংলিশ শিক্ষক</h2>
-        <p>গুগল একাউন্ট দিয়ে লগইন করুন এবং শেখা শুরু করুন</p>
-        <div id="g_id_onload"
-            data-client_id="1039650057318-27mqpolij5t5nv655hp2im0n3cbkn8b2.apps.googleusercontent.com"
-            data-context="signin"
-            data-ux_mode="popup"
-            data-callback="handleCredentialResponse">
-        </div>
-        <div class="g_id_signin" data-type="standard"></div>
-    </section>
+    <div class="container">
+        <h1>ডেটা এন্ট্রি সিস্টেম</h1>
 
-    <!-- Chat Section -->
-    <section id="chat-section" style="display:none;">
-        <header>
-            <h2>আপনার AI শিক্ষক</h2>
-            <button id="logout-btn">লগআউট</button>
-        </header>
-        
-        <div id="chat-box"></div>
-
-        <div class="input-area">
-            <input type="text" id="user-input" placeholder="আপনার কথা লিখুন বা বলুন...">
-            <button id="send-btn">পাঠান</button>
-            <button id="mic-btn">🎤</button>
+        <div class="section">
+            <h2>নতুন নাম রেজিস্টার করুন</h2>
+            <input type="text" id="newNameInput" placeholder="নাম লিখুন">
+            <button onclick="addName()">যোগ করুন</button>
         </div>
-    </section>
+
+        <div class="section">
+            <h2>ডেটা এন্ট্রি</h2>
+            <select id="nameSelect" onchange="showEntryBoxes()">
+                <option value="">একটি নাম নির্বাচন করুন</option>
+            </select>
+            
+            <div id="entryBoxes" style="display: none;">
+                <p>নাম্বার এবং অ্যামাউন্ট দিন:</p>
+                <div id="numberInputs">
+                    </div>
+                <div class="total-amount">
+                    <strong>মোট টাকা:</strong> <span id="totalAmountDisplay">0</span>
+                </div>
+            </div>
+            
+            <button onclick="saveData()">ডেটা সেভ করুন</button>
+        </div>
+
+        <div class="section">
+            <h2>রিপোর্ট</h2>
+            <div id="reportContainer">
+                </div>
+        </div>
+
+    </div>
 
     <script src="script.js"></script>
 </body>
