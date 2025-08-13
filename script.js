@@ -3,20 +3,7 @@ let nameData = {};
 const validUser = "admin";
 const validPass = "12345";
 
-document.addEventListener('DOMContentLoaded', () => {
-    // 0 থেকে 9 পর্যন্ত ইনপুট বক্স তৈরি করা
-    const numberInputsDiv = document.getElementById('numberInputs');
-    for (let i = 0; i <= 9; i++) {
-        const inputGroup = document.createElement('div');
-        inputGroup.className = 'number-input-group';
-        inputGroup.innerHTML = `
-            <label>${i}:</label>
-            <input type="number" id="input-${i}" value="0" min="0">
-        `;
-        numberInputsDiv.appendChild(inputGroup);
-    }
-});
-
+// লগইন করার জন্য নতুন ফাংশন
 function login() {
     const username = document.getElementById('usernameInput').value;
     const password = document.getElementById('passwordInput').value;
@@ -24,19 +11,37 @@ function login() {
     if (username === validUser && password === validPass) {
         document.getElementById('loginSection').style.display = 'none';
         document.getElementById('mainContent').style.display = 'block';
+        // লগইন সফল হলে, 0-9 পর্যন্ত ইনপুট বক্স তৈরি করুন
+        createNumberInputs();
         alert('সফলভাবে লগইন হয়েছে!');
     } else {
         alert('ভুল ইউজারনেম বা পাসওয়ার্ড!');
     }
 }
 
+// 0-9 পর্যন্ত ইনপুট বক্স তৈরির ফাংশন
+function createNumberInputs() {
+    const numberInputsDiv = document.getElementById('numberInputs');
+    numberInputsDiv.innerHTML = ''; // আগের কোনো ইনপুট থাকলে তা মুছে ফেলুন
+    for (let i = 0; i <= 9; i++) {
+        const inputGroup = document.createElement('div');
+        inputGroup.className = 'number-input-group';
+        inputGroup.innerHTML = `
+            <label>${i}:</label>
+            <input type="number" id="input-${i}" value="0" min="0" onchange="updateTotal()">
+        `;
+        numberInputsDiv.appendChild(inputGroup);
+    }
+}
+
+// নাম যোগ করার ফাংশন
 function addName() {
     const newNameInput = document.getElementById('newNameInput');
     const newName = newNameInput.value.trim();
 
     if (newName && !registeredNames.includes(newName)) {
         registeredNames.push(newName);
-        nameData[newName] = {}; 
+        nameData[newName] = Array(10).fill(0); // 10টি সংখ্যার জন্য অ্যারে তৈরি
         updateNameSelect();
         newNameInput.value = '';
         alert(`${newName} সফলভাবে রেজিস্টার হয়েছে!`);
@@ -45,6 +50,7 @@ function addName() {
     }
 }
 
+// ড্রপডাউন মেনু আপডেট করার ফাংশন
 function updateNameSelect() {
     const nameSelect = document.getElementById('nameSelect');
     nameSelect.innerHTML = '<option value="">একটি নাম নির্বাচন করুন</option>';
@@ -56,6 +62,7 @@ function updateNameSelect() {
     });
 }
 
+// ডেটা এন্ট্রি বক্স দেখানোর ফাংশন
 function showEntryBoxes() {
     const selectedName = document.getElementById('nameSelect').value;
     const entryBoxes = document.getElementById('entryBoxes');
@@ -68,16 +75,28 @@ function showEntryBoxes() {
     }
 }
 
+// নির্বাচিত নামের জন্য ডেটা লোড করার ফাংশন
 function loadDataForName(name) {
     let totalAmount = 0;
     for (let i = 0; i <= 9; i++) {
-        const inputField = document.getElementById(`input-${i}`);
-        // আপাতত, প্রতিটি ইনপুট বক্স ০ দিয়ে শুরু হবে
-        inputField.value = 0;
+        const amount = nameData[name][i] || 0;
+        document.getElementById(`input-${i}`).value = amount;
+        totalAmount += amount;
     }
     document.getElementById('totalAmountDisplay').textContent = totalAmount;
 }
 
+// মোট টাকার পরিমাণ আপডেট করার ফাংশন
+function updateTotal() {
+    let currentTotal = 0;
+    for (let i = 0; i <= 9; i++) {
+        const amount = parseInt(document.getElementById(`input-${i}`).value) || 0;
+        currentTotal += amount;
+    }
+    document.getElementById('totalAmountDisplay').textContent = currentTotal;
+}
+
+// ডেটা সেভ করার ফাংশন
 function saveData() {
     const selectedName = document.getElementById('nameSelect').value;
     if (!selectedName) {
@@ -88,9 +107,9 @@ function saveData() {
     let currentTotal = 0;
     for (let i = 0; i <= 9; i++) {
         const amount = parseInt(document.getElementById(`input-${i}`).value) || 0;
+        nameData[selectedName][i] = amount;
         currentTotal += amount;
     }
-
     document.getElementById('totalAmountDisplay').textContent = currentTotal;
     alert(`ডেটা সেভ করা হয়েছে! মোট টাকা: ${currentTotal}`);
 }
